@@ -1,6 +1,10 @@
-// Sprite.h
-// By Frank Luna
-// August 24, 2004.
+/*! 
+ *  \brief     Sprite class.
+ *  \details   This class is used to handle simple sprites.
+ *  \author    Frank Luna, Mihai Popescu
+ *  \date      24/08/2004
+ *  \copyright GNU Public License.
+ */
 #ifndef SPRITE_H
 #define SPRITE_H
 
@@ -17,18 +21,19 @@ public:
 
 	virtual ~Sprite();
 
-	int width(){ return mImageBM.bmWidth; }
-	int height(){ return mImageBM.bmHeight; }
-	void update(float dt);
+	int GetWidth() { return myBitmap.bmWidth; }
+	int GetHeight() { return myBitmap.bmHeight; }
+
+	virtual void Update(float dt);
+	virtual void Draw();
 
 	void setBackBuffer(const BackBuffer *pBackBuffer);
-	virtual void draw();
-
+	
 public:
 	// Keep these public because they need to be
 	// modified externally frequently.
-	Vec2 mPosition;
-	Vec2 mVelocity;
+	Vec2 myPosition;
+	Vec2 myVelocity;
 
 private:
 	// Make copy constructor and assignment operator private
@@ -39,44 +44,23 @@ private:
 	Sprite& operator=(const Sprite& rhs);
 
 protected:
-	HBITMAP mhImage;
-	HBITMAP mhMask;
-	BITMAP mImageBM;
-	BITMAP mMaskBM;
-
-	HDC mhSpriteDC;
-	const BackBuffer *mpBackBuffer;
-
-	COLORREF mcTransparentColor;
 	void drawTransparent();
 	void drawMask();
-};
 
-// AnimatedSprite
-// by Mihai Popescu
-// April 5, 2008
-class AnimatedSprite : public Sprite
-{
-public:
-	//NOTE: The animation is on a single row.
-	AnimatedSprite(const char *szImageFile, const char *szMaskFile, const RECT& rcFirstFrame, int iFrameCount);
-	virtual ~AnimatedSprite() { }
-
-public:
-	void SetFrame(int iIndex);
-	int GetFrameCount() { return miFrameCount; }
-
-	virtual void draw();
-	
 protected:
-	POINT mptFrameStartCrop;// first point of the frame (upper-left corner)
-	POINT mptFrameCrop;		// crop point of frame
-	int miFrameWidth;		// width
-	int miFrameHeight;		// height
-	int miFrameCount;		// number of frames
+	const BackBuffer *myBackBuffer;
+
+	HBITMAP myImage;
+	HBITMAP myImageMask;
+	BITMAP myBitmap;
+	BITMAP myBitmapMask;
+	COLORREF myTransparentColor;
+	HDC mySpriteDC;
+
+	int myFrameCropX;
+	int myFrameCropY;
+	int myFrameWidth;
+	int myFrameHeight;
 };
-
-
 
 #endif // SPRITE_H
-

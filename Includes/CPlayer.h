@@ -15,6 +15,7 @@
 //-----------------------------------------------------------------------------
 #include "Main.h"
 #include "Sprite.h"
+#include "AnimatedSprite.h"
 
 //-----------------------------------------------------------------------------
 // Main Class Definitions
@@ -59,19 +60,17 @@ public:
 	Vec2&					Velocity();
 
 	void					Explode();
-	bool					AdvanceExplosion();
 
 private:
 	//-------------------------------------------------------------------------
 	// Private Variables for This Class.
 	//-------------------------------------------------------------------------
-	Sprite*					m_pSprite;
-	ESpeedStates			m_eSpeedState;
-	float					m_fTimer;
+	Sprite*							m_pSprite;
+	ESpeedStates				m_eSpeedState;
+	float								m_fTimer;
 	
-	bool					m_bExplosion;
+	bool								m_bExplosion;
 	AnimatedSprite*			m_pExplosionSprite;
-	int						m_iExplosionFrame;
 };
 
 #endif // _CPLAYER_H_

@@ -26,7 +26,7 @@ CGameApp::CGameApp()
 	m_hWnd			= NULL;
 	m_hIcon			= NULL;
 	m_hMenu			= NULL;
-	m_pBBuffer		= NULL;
+	m_pBBuffer	= NULL;
 	m_pPlayer		= NULL;
 	m_LastFrameRate = 0;
 }
@@ -73,24 +73,24 @@ bool CGameApp::CreateDisplay()
 {
 	LPTSTR			WindowTitle		= _T("GameFramework");
 	LPCSTR			WindowClass		= _T("GameFramework_Class");
-	USHORT			Width			= 800;
-	USHORT			Height			= 600;
-	RECT			rc;
-	WNDCLASSEX		wcex;
+	USHORT			Width					= 800;
+	USHORT			Height				= 600;
+	RECT				rc;
+	WNDCLASSEX	wcex;
 
 
-	wcex.cbSize			= sizeof(WNDCLASSEX);
-	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc	= CGameApp::StaticWndProc;
-	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= 0;
-	wcex.hInstance		= g_hInst;
-	wcex.hIcon			= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	wcex.cbSize					= sizeof(WNDCLASSEX);
+	wcex.style					= CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc		= CGameApp::StaticWndProc;
+	wcex.cbClsExtra			= 0;
+	wcex.cbWndExtra			= 0;
+	wcex.hInstance			= g_hInst;
+	wcex.hIcon					= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hCursor				= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName	= 0;
+	wcex.lpszMenuName		= 0;
 	wcex.lpszClassName	= WindowClass;
-	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hIconSm				= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	if(RegisterClassEx(&wcex)==0)
 		return false;
@@ -141,7 +141,7 @@ int CGameApp::BeginGame()
 
 		} // End If messages waiting
 	
-	} // Until quit message is receieved
+	} // Until quit message is received
 
 	return 0;
 }
@@ -170,7 +170,7 @@ bool CGameApp::ShutDown()
 
 //-----------------------------------------------------------------------------
 // Name : StaticWndProc () (Static Callback)
-// Desc : This is the main messge pump for ALL display devices, it captures
+// Desc : This is the main message pump for ALL display devices, it captures
 //		the appropriate messages, and routes them through to the application
 //		class for which it was intended, therefore giving full class access.
 // Note : It is VITALLY important that you should pass your 'this' pointer to
@@ -199,8 +199,6 @@ LRESULT CALLBACK CGameApp::StaticWndProc(HWND hWnd, UINT Message, WPARAM wParam,
 //-----------------------------------------------------------------------------
 LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam )
 {
-	static UINT			fTimer;	
-
 	// Determine message type
 	switch (Message)
 	{
@@ -230,10 +228,7 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 				// Store new viewport sizes
 				m_nViewWidth  = LOWORD( lParam );
 				m_nViewHeight = HIWORD( lParam );
-		
-			
 			} // End if !Minimized
-
 			break;
 
 		case WM_LBUTTONDOWN:
@@ -254,18 +249,8 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 				PostQuitMessage(0);
 				break;
 			case VK_RETURN:
-				fTimer = SetTimer(m_hWnd, 1, 250, NULL);
 				m_pPlayer->Explode();
 				break;
-			}
-			break;
-
-		case WM_TIMER:
-			switch(wParam)
-			{
-			case 1:
-				if(!m_pPlayer->AdvanceExplosion())
-					KillTimer(m_hWnd, 1);
 			}
 			break;
 

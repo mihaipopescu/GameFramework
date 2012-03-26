@@ -1,11 +1,15 @@
-#pragma once
-// ImageFile.h
-// by Mihai Popescu
-// March 2009
+/*! 
+ *  \brief     ImageFile class.
+ *  \details   This class is responsible for loading / drawing bitmap images.
+ *  \author    Mihai Popescu
+ *  \date      01/03/2009
+ *  \copyright GNU Public License.
+ */
+
+#ifndef IMAGE_FILE_H
+#define IMAGE_FILE_H
 #include "main.h"
 
-
-typedef BYTE (*RGBQUAD_TO_BYTE)(const RGBQUAD &q);
 
 enum EColorChannel
 {
@@ -23,15 +27,6 @@ enum EColorChannel
 
 class CImageFile
 {
-protected:
-	BITMAPINFOHEADER m_biInfo;
-	RGBQUAD *m_pRGB;
-	HBITMAP m_hBMP;
-
-	LONG &height;
-	LONG &width;
-	char m_szFileName[MAX_PATH];
-
 public:
 	CImageFile(void);
 	virtual ~CImageFile(void);
@@ -39,12 +34,23 @@ public:
 	bool LoadBitmapFromFile(const char* szFileName, HDC hdc);
 	virtual void Paint(HDC hdc, int x, int y);
 
-	LONG Height() const { return height; }
-	LONG Width() const { return width; }
+	LONG Height() const { return myHeight; }
+	LONG Width() const { return myWidth; }
 
-	void Clear() { ZeroMemory(m_pRGB, sizeof(RGBQUAD) * width * height); }
+	void Clear() { ZeroMemory(myRGBArray, sizeof(RGBQUAD) * myWidth * myHeight); }
 	void Reload(HDC hdc);
 
 	BYTE* CopyMonoImage(EColorChannel chn, const RECT* rc = NULL);
 	void PasteMonoImage(const BYTE *img, EColorChannel chn, const RECT* rc = NULL);
+
+protected:
+	BITMAPINFOHEADER myBMPInfo;
+	RGBQUAD *myRGBArray;
+	HBITMAP myBitmap;
+
+	LONG &myHeight;
+	LONG &myWidth;
+	char myFileName[MAX_PATH];
 };
+
+#endif // IMAGE_FILE_H

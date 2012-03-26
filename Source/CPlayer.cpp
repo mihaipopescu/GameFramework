@@ -31,10 +31,9 @@ CPlayer::CPlayer(const BackBuffer *pBackBuffer)
 	r.right = 128;
 	r.bottom = 128;
 
-	m_pExplosionSprite	= new AnimatedSprite("data/explosion.bmp", "data/explosionmask.bmp", r, 4);
-	m_pExplosionSprite->setBackBuffer( pBackBuffer );
+	m_pExplosionSprite	= new AnimatedSprite("data/explosion.bmp", "data/explosionmask.bmp");
+	m_pExplosionSprite->Initialize(pBackBuffer, r, 16, 2 / 16.f);
 	m_bExplosion		= false;
-	m_iExplosionFrame	= 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -49,12 +48,12 @@ CPlayer::~CPlayer()
 
 void CPlayer::Update(float dt)
 {
-	// Update sprite
-	m_pSprite->update(dt);
-
+	// Update sprites
+	m_pSprite->Update(dt);
+	m_pExplosionSprite->Update(dt);
 
 	// Get velocity
-	double v = m_pSprite->mVelocity.Magnitude();
+	double v = m_pSprite->myVelocity.Magnitude();
 
 	// NOTE: for each async sound played Windows creates a thread for you
 	// but only one, so you cannot play multiple sounds at once.
@@ -63,6 +62,14 @@ void CPlayer::Update(float dt)
 
 	// update internal time counter used in sound handling (not to overlap sounds)
 	m_fTimer += dt;
+
+	// handle plane explosion
+	if(m_bExplosion && m_pExplosionSprite->IsFinished())
+	{
+		m_bExplosion = false;
+		m_pSprite->myVelocity = Vec2(0,0);
+		m_eSpeedState = SPEED_STOP;
+	}
 
 	// A FSM is used for sound manager 
 	switch(m_eSpeedState)
@@ -100,59 +107,41 @@ void CPlayer::Update(float dt)
 void CPlayer::Draw()
 {
 	if(!m_bExplosion)
-		m_pSprite->draw();
+		m_pSprite->Draw();
 	else
-		m_pExplosionSprite->draw();
+		m_pExplosionSprite->Draw();
 }
 
 void CPlayer::Move(ULONG ulDirection)
 {
 	if( ulDirection & CPlayer::DIR_LEFT )
-		m_pSprite->mVelocity.x -= .1;
+		m_pSprite->myVelocity.x -= .1;
 
 	if( ulDirection & CPlayer::DIR_RIGHT )
-		m_pSprite->mVelocity.x += .1;
+		m_pSprite->myVelocity.x += .1;
 
 	if( ulDirection & CPlayer::DIR_FORWARD )
-		m_pSprite->mVelocity.y -= .1;
+		m_pSprite->myVelocity.y -= .1;
 
 	if( ulDirection & CPlayer::DIR_BACKWARD )
-		m_pSprite->mVelocity.y += .1;
+		m_pSprite->myVelocity.y += .1;
 }
 
 
 Vec2& CPlayer::Position()
 {
-	return m_pSprite->mPosition;
+	return m_pSprite->myPosition;
 }
 
 Vec2& CPlayer::Velocity()
 {
-	return m_pSprite->mVelocity;
+	return m_pSprite->myVelocity;
 }
 
 void CPlayer::Explode()
 {
-	m_pExplosionSprite->mPosition = m_pSprite->mPosition;
-	m_pExplosionSprite->SetFrame(0);
+	m_pExplosionSprite->myPosition = m_pSprite->myPosition;
+	m_pExplosionSprite->Play();
 	PlaySound("data/explosion.wav", NULL, SND_FILENAME | SND_ASYNC);
 	m_bExplosion = true;
-}
-
-bool CPlayer::AdvanceExplosion()
-{
-	if(m_bExplosion)
-	{
-		m_pExplosionSprite->SetFrame(m_iExplosionFrame++);
-		if(m_iExplosionFrame==m_pExplosionSprite->GetFrameCount())
-		{
-			m_bExplosion = false;
-			m_iExplosionFrame = 0;
-			m_pSprite->mVelocity = Vec2(0,0);
-			m_eSpeedState = SPEED_STOP;
-			return false;
-		}
-	}
-
-	return true;
 }

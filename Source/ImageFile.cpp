@@ -1,16 +1,13 @@
-// ImageFile.cpp
-// by Mihai Popescu
-// March 2009
 #include "ImageFile.h"
 
 extern HINSTANCE g_hInst;
 
 
-CImageFile::CImageFile() : height(m_biInfo.biHeight), width(m_biInfo.biWidth)
+CImageFile::CImageFile() : myHeight(myBMPInfo.biHeight), myWidth(myBMPInfo.biWidth)
 {
-	m_hBMP = 0;
-	m_pRGB = NULL;
-	ZeroMemory(&m_biInfo, sizeof(BITMAPINFOHEADER));
+	myBitmap = 0;
+	myRGBArray = NULL;
+	ZeroMemory(&myBMPInfo, sizeof(BITMAPINFOHEADER));
 }
 
 bool CImageFile::LoadBitmapFromFile(const char *szFileName, HDC hdc)
@@ -18,49 +15,49 @@ bool CImageFile::LoadBitmapFromFile(const char *szFileName, HDC hdc)
 	BYTE *pData;
 	HDC mdc = CreateCompatibleDC(hdc);
 
-	strcpy_s(m_szFileName, MAX_PATH, szFileName);
+	strcpy_s(myFileName, MAX_PATH, szFileName);
 
 	// release previously loaded file data
-	if(m_pRGB)
+	if(myRGBArray)
 	{
-		delete[] m_pRGB;
-		m_pRGB = NULL;
+		delete[] myRGBArray;
+		myRGBArray = NULL;
 	}
 
-	if(m_hBMP)
+	if(myBitmap)
 	{
-		DeleteObject(m_hBMP);
-		m_hBMP = 0;
+		DeleteObject(myBitmap);
+		myBitmap = 0;
 	}
 
 	// Loads the image.
-	m_hBMP = (HBITMAP)LoadImage(g_hInst, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);	
+	myBitmap = (HBITMAP)LoadImage(g_hInst, szFileName, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);	
 
-	if(!m_hBMP)
+	if(!myBitmap)
 		return false;
 
-	ZeroMemory(&m_biInfo, sizeof(BITMAPINFO));
-	m_biInfo.biSize=sizeof(BITMAPINFOHEADER);
+	ZeroMemory(&myBMPInfo, sizeof(BITMAPINFO));
+	myBMPInfo.biSize=sizeof(BITMAPINFOHEADER);
 
 	// send NULL to bits to get the bitmap info
-	GetDIBits(mdc, m_hBMP, 0, 0, NULL, (BITMAPINFO*)&m_biInfo, DIB_RGB_COLORS);
+	GetDIBits(mdc, myBitmap, 0, 0, NULL, (BITMAPINFO*)&myBMPInfo, DIB_RGB_COLORS);
 
-	pData = new BYTE[m_biInfo.biSizeImage];
+	pData = new BYTE[myBMPInfo.biSizeImage];
 
 	// read the bitmap data
 	// NOTE: We use this method to access the bitmap bits in order to modify them
 	// applying different filters or other image processing algorithms in real time 
 	// such as blur effect (denoising) or other convolutions.
-	GetDIBits(mdc, m_hBMP, 0, height, pData, (BITMAPINFO*)&m_biInfo, DIB_RGB_COLORS);
+	GetDIBits(mdc, myBitmap, 0, myHeight, pData, (BITMAPINFO*)&myBMPInfo, DIB_RGB_COLORS);
 
-	m_pRGB = new RGBQUAD[width * height];
+	myRGBArray = new RGBQUAD[myWidth * myHeight];
 
 	// Fill RGB image on 32 bit in order to display it
-	if(m_biInfo.biBitCount == 24)
+	if(myBMPInfo.biBitCount == 24)
 	{
-		int size = width * height;
+		int size = myWidth * myHeight;
 		unsigned char *data = pData;
-		RGBQUAD *c = m_pRGB;
+		RGBQUAD *c = myRGBArray;
 
 		for(int i=0;i<size;i++)
 		{
@@ -72,10 +69,10 @@ bool CImageFile::LoadBitmapFromFile(const char *szFileName, HDC hdc)
 		}
 	}
 
-	m_biInfo.biBitCount = 32;
+	myBMPInfo.biBitCount = 32;
 
-	DeleteObject(m_hBMP);
-	m_hBMP = 0;
+	DeleteObject(myBitmap);
+	myBitmap = 0;
 
 	DeleteDC(mdc);
 
@@ -86,24 +83,24 @@ bool CImageFile::LoadBitmapFromFile(const char *szFileName, HDC hdc)
 
 void CImageFile::Reload(HDC hdc)
 {
-	LoadBitmapFromFile(m_szFileName, hdc);
+	LoadBitmapFromFile(myFileName, hdc);
 }
 
 void CImageFile::Paint(HDC hdc, int x, int y)
 {
-	if(!m_pRGB)
+	if(!myRGBArray)
 		return;
 
-	if(!m_hBMP)
-		m_hBMP = CreateCompatibleBitmap(hdc, width, height);
+	if(!myBitmap)
+		myBitmap = CreateCompatibleBitmap(hdc, myWidth, myHeight);
 
 	HDC mdc = CreateCompatibleDC(hdc);
 
-	SelectObject(mdc, m_hBMP);
+	SelectObject(mdc, myBitmap);
 
-	SetDIBits(mdc, m_hBMP, 0, height, m_pRGB, (BITMAPINFO*)&m_biInfo, DIB_RGB_COLORS);
+	SetDIBits(mdc, myBitmap, 0, myHeight, myRGBArray, (BITMAPINFO*)&myBMPInfo, DIB_RGB_COLORS);
 
-	BitBlt(hdc, x, y, width, height, mdc, 0, 0, SRCCOPY);
+	BitBlt(hdc, x, y, myWidth, myHeight, mdc, 0, 0, SRCCOPY);
 
 	DeleteDC(mdc);
 }
@@ -111,16 +108,16 @@ void CImageFile::Paint(HDC hdc, int x, int y)
 
 CImageFile::~CImageFile(void)
 {
-	if(m_pRGB)
-		delete[] m_pRGB;
+	if(myRGBArray)
+		delete[] myRGBArray;
 
-	DeleteObject(m_hBMP);
+	DeleteObject(myBitmap);
 }
 
 BYTE* CImageFile::CopyMonoImage(EColorChannel chn, const RECT* rc)
 {
-	int imgHeight = rc? rc->bottom - rc->top + 1 : height;
-	int imgWidth = rc? rc->right - rc->left + 1 : width;
+	int imgHeight = rc? rc->bottom - rc->top + 1 : myHeight;
+	int imgWidth = rc? rc->right - rc->left + 1 : myWidth;
 	int x = rc? rc->left : 0;
 	int y = rc? rc->top : 0;
 
@@ -132,26 +129,26 @@ BYTE* CImageFile::CopyMonoImage(EColorChannel chn, const RECT* rc)
 	case ECC_RED:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				img[i*imgWidth + j] = m_pRGB[(i+y)*width + j + x].rgbRed;
+				img[i*imgWidth + j] = myRGBArray[(i+y)*myWidth + j + x].rgbRed;
 		break;
 
 	case ECC_GREEN:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				img[i*imgWidth + j] = m_pRGB[(i+y)*width + j + x].rgbGreen;
+				img[i*imgWidth + j] = myRGBArray[(i+y)*myWidth + j + x].rgbGreen;
 		break;
 
 	case ECC_BLUE:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				img[i*imgWidth + j] = m_pRGB[(i+y)*width + j + x].rgbBlue;
+				img[i*imgWidth + j] = myRGBArray[(i+y)*myWidth + j + x].rgbBlue;
 		break;
 
 	case ECC_HUE:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
 			{
-				RGBQUAD &q = m_pRGB[(i+y)*width + j + x];
+				RGBQUAD &q = myRGBArray[(i+y)*myWidth + j + x];
 				float r = q.rgbRed/255.0f;
 				float g = q.rgbGreen/255.0f;
 				float b = q.rgbBlue/255.0f;
@@ -196,7 +193,7 @@ BYTE* CImageFile::CopyMonoImage(EColorChannel chn, const RECT* rc)
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
 			{
-				RGBQUAD &q = m_pRGB[(i+y)*width + j + x];
+				RGBQUAD &q = myRGBArray[(i+y)*myWidth + j + x];
 				float r = q.rgbRed/255.0f;
 				float g = q.rgbGreen/255.0f;
 				float b = q.rgbBlue/255.0f;
@@ -231,7 +228,7 @@ BYTE* CImageFile::CopyMonoImage(EColorChannel chn, const RECT* rc)
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
 			{
-				RGBQUAD &q = m_pRGB[(i+y)*width + j + x];
+				RGBQUAD &q = myRGBArray[(i+y)*myWidth + j + x];
 				float r = q.rgbRed/255.0f;
 				float g = q.rgbGreen/255.0f;
 				float b = q.rgbBlue/255.0f;
@@ -261,8 +258,8 @@ BYTE* CImageFile::CopyMonoImage(EColorChannel chn, const RECT* rc)
 
 void CImageFile::PasteMonoImage(const BYTE *img, EColorChannel chn, const RECT* rc)
 {
-	int imgHeight = rc? rc->bottom - rc->top + 1 : height;
-	int imgWidth = rc? rc->right - rc->left + 1 : width;
+	int imgHeight = rc? rc->bottom - rc->top + 1 : myHeight;
+	int imgWidth = rc? rc->right - rc->left + 1 : myWidth;
 	int x = rc? rc->left : 0;
 	int y = rc? rc->top : 0;
 
@@ -276,21 +273,21 @@ void CImageFile::PasteMonoImage(const BYTE *img, EColorChannel chn, const RECT* 
 	case ECC_RED:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				m_pRGB[(i+y)*width + j + x].rgbRed = img[i*imgWidth + j];
+				myRGBArray[(i+y)*myWidth + j + x].rgbRed = img[i*imgWidth + j];
 		break;
 
 	case ECC_EXCLUSIVEGREEN:
 	case ECC_GREEN:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				m_pRGB[(i+y)*width + j + x].rgbGreen = img[i*imgWidth + j];
+				myRGBArray[(i+y)*myWidth + j + x].rgbGreen = img[i*imgWidth + j];
 		break;
 
 	case ECC_EXCLUSIVEBLUE:
 	case ECC_BLUE:
 		for(int i=0;i<imgHeight;i++)
 			for(int j=0;j<imgWidth;j++)
-				m_pRGB[(i+y)*width + j + x].rgbBlue = img[i*imgWidth + j];
+				myRGBArray[(i+y)*myWidth + j + x].rgbBlue = img[i*imgWidth + j];
 		break;
 	}
 

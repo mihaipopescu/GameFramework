@@ -1,10 +1,11 @@
-//-----------------------------------------------------------------------------
-// File: Vec2.h
-//
-// Desc: Defines vector based co-ords used throughout game.
-//		Overrides operators to allow two entry vector based calculations
-//
-//-----------------------------------------------------------------------------
+/*! 
+ *  \brief     Vec2 class.
+ *  \details   Defines vector based coordinates used throughout game.
+ *						 Overrides operators to allow two entry vector based calculations.
+ *  \author    Mihai Popescu
+ *  \date      01/03/2009
+ *  \copyright GNU Public License.
+ */
 
 #ifndef VEC2_H
 #define VEC2_H
@@ -42,4 +43,6 @@ public:
 
 Vec2 Polar(double r, double radians);
 double PrincipleAngle(double radians);
+
+
 #endif // VEC2_H
