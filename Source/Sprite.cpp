@@ -76,6 +76,14 @@ Sprite::~Sprite()
 	DeleteDC(mySpriteDC);
 }
 
+void Sprite::Setup(HDC hBackBufferDC)
+{
+	if( mySpriteDC == 0 )
+	{
+		mySpriteDC = CreateCompatibleDC(hBackBufferDC);
+	}
+}
+
 void Sprite::Update(float dt)
 {
 	// Update the sprites position.
@@ -84,31 +92,16 @@ void Sprite::Update(float dt)
 	// Update bounding rectangle/circle
 }
 
-void Sprite::setBackBuffer(const BackBuffer *pBackBuffer)
-{
-	myBackBuffer = pBackBuffer;
-	if(myBackBuffer)
-	{
-		DeleteDC(mySpriteDC);
-		mySpriteDC = CreateCompatibleDC(myBackBuffer->getDC());
-	}
-}
-
-void Sprite::Draw()
+void Sprite::Draw(HDC hBackBufferDC) const
 {
 	if( myImageMask != 0 )
-		drawMask();
+		drawMask(hBackBufferDC);
 	else
-		drawTransparent();
+		drawTransparent(hBackBufferDC);
 }
 
-void Sprite::drawMask()
+void Sprite::drawMask(HDC hBackBufferDC) const
 {
-	if( myBackBuffer == NULL )
-		return;
-
-	HDC hBackBufferDC = myBackBuffer->getDC();
-
 	// The position BitBlt wants is not the sprite's center
 	// position; rather, it wants the upper-left position,
 	// so compute that.
@@ -139,13 +132,8 @@ void Sprite::drawMask()
 	SelectObject(mySpriteDC, oldObj);
 }
 
-void Sprite::drawTransparent()
+void Sprite::drawTransparent(HDC hBackBufferDC) const
 {
-	if( myBackBuffer == NULL )
-		return;
-
-	HDC hBackBuffer = myBackBuffer->getDC();
-
 	int w = GetWidth();
 	int h = GetHeight();
 
@@ -153,13 +141,13 @@ void Sprite::drawTransparent()
 	int x = (int)myPosition.x - (w / 2);
 	int y = (int)myPosition.y - (h / 2);
 
-	COLORREF crOldBack = SetBkColor(hBackBuffer, RGB(255, 255, 255));
-	COLORREF crOldText = SetTextColor(hBackBuffer, RGB(0, 0, 0));
+	COLORREF crOldBack = SetBkColor(hBackBufferDC, RGB(255, 255, 255));
+	COLORREF crOldText = SetTextColor(hBackBufferDC, RGB(0, 0, 0));
 	HDC dcImage, dcTrans;
 
 	// Create two memory dcs for the image and the mask
-	dcImage=CreateCompatibleDC(hBackBuffer);
-	dcTrans=CreateCompatibleDC(hBackBuffer);
+	dcImage=CreateCompatibleDC(hBackBufferDC);
+	dcTrans=CreateCompatibleDC(hBackBufferDC);
 
 	// Select the image into the appropriate dc
 	SelectObject(dcImage, myImage);
@@ -177,9 +165,9 @@ void Sprite::drawTransparent()
 	BitBlt(dcTrans, 0, 0, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCCOPY);
 
 	// Do the work - True Mask method - cool if not actual display
-	BitBlt(hBackBuffer, x, y, myFrameWidth, myFrameHeight, dcImage, myFrameCropX, myFrameCropY, SRCINVERT);
-	BitBlt(hBackBuffer, x, y, myFrameWidth, myFrameHeight, dcTrans, myFrameCropX, myFrameCropY, SRCAND);
-	BitBlt(hBackBuffer, x, y, myFrameWidth, myFrameHeight, dcImage, myFrameCropX, myFrameCropY, SRCINVERT);
+	BitBlt(hBackBufferDC, x, y, myFrameWidth, myFrameHeight, dcImage, myFrameCropX, myFrameCropY, SRCINVERT);
+	BitBlt(hBackBufferDC, x, y, myFrameWidth, myFrameHeight, dcTrans, myFrameCropX, myFrameCropY, SRCAND);
+	BitBlt(hBackBufferDC, x, y, myFrameWidth, myFrameHeight, dcImage, myFrameCropX, myFrameCropY, SRCINVERT);
 
 	// free memory	
 	DeleteDC(dcImage);
@@ -187,6 +175,6 @@ void Sprite::drawTransparent()
 	DeleteObject(bitmapTrans);
 
 	// Restore settings
-	SetBkColor(hBackBuffer, crOldBack);
-	SetTextColor(hBackBuffer, crOldText);
+	SetBkColor(hBackBufferDC, crOldBack);
+	SetTextColor(hBackBufferDC, crOldText);
 }

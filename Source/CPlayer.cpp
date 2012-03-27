@@ -16,11 +16,10 @@
 // Name : CPlayer () (Constructor)
 // Desc : CPlayer Class Constructor
 //-----------------------------------------------------------------------------
-CPlayer::CPlayer(const BackBuffer *pBackBuffer)
+CPlayer::CPlayer()
 {
 	//m_pSprite = new Sprite("data/planeimg.bmp", "data/planemask.bmp");
 	m_pSprite = new Sprite("data/planeimgandmask.bmp", RGB(0xff,0x00, 0xff));
-	m_pSprite->setBackBuffer( pBackBuffer );
 	m_eSpeedState = SPEED_STOP;
 	m_fTimer = 0;
 
@@ -32,7 +31,7 @@ CPlayer::CPlayer(const BackBuffer *pBackBuffer)
 	r.bottom = 128;
 
 	m_pExplosionSprite	= new AnimatedSprite("data/explosion.bmp", "data/explosionmask.bmp");
-	m_pExplosionSprite->Initialize(pBackBuffer, r, 16, 2 / 16.f);
+	m_pExplosionSprite->Initialize(r, 16, 2 / 16.f);
 	m_bExplosion		= false;
 }
 
@@ -44,6 +43,13 @@ CPlayer::~CPlayer()
 {
 	delete m_pSprite;
 	delete m_pExplosionSprite;
+}
+
+void CPlayer::Init(HDC hdc, const Vec2& position)
+{
+	m_pSprite->Setup(hdc);
+	m_pExplosionSprite->Setup(hdc);
+	Position() = position;
 }
 
 void CPlayer::Update(float dt)
@@ -58,7 +64,7 @@ void CPlayer::Update(float dt)
 	// NOTE: for each async sound played Windows creates a thread for you
 	// but only one, so you cannot play multiple sounds at once.
 	// This creation/destruction of threads also leads to bad performance
-	// so this method is not recommanded to be used in complex projects.
+	// so this method is not recommended to be used in complex projects.
 
 	// update internal time counter used in sound handling (not to overlap sounds)
 	m_fTimer += dt;
@@ -99,17 +105,17 @@ void CPlayer::Update(float dt)
 	}
 
 	// NOTE: For sound you also can use MIDI but it's Win32 API it is a bit hard
-	// see msdn reference: http://msdn.microsoft.com/en-us/library/ms711640.aspx
+	// see MSDN reference: http://msdn.microsoft.com/en-us/library/ms711640.aspx
 	// In this case you can use a C++ wrapper for it. See the following article:
 	// http://www.codeproject.com/KB/audio-video/midiwrapper.aspx (with code also)
 }
 
-void CPlayer::Draw()
+void CPlayer::Draw(HDC hdc) const
 {
 	if(!m_bExplosion)
-		m_pSprite->Draw();
+		m_pSprite->Draw(hdc);
 	else
-		m_pExplosionSprite->Draw();
+		m_pExplosionSprite->Draw(hdc);
 }
 
 void CPlayer::Move(ULONG ulDirection)

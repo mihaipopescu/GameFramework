@@ -177,6 +177,7 @@
     <ClInclude Include="Includes\AnimatedSprite.h" />
     <ClInclude Include="Includes\BackBuffer.h" />
     <ClInclude Include="Includes\CGameApp.h" />
+    <ClInclude Include="Includes\CGameObject.h" />
     <ClInclude Include="Includes\CPlayer.h" />
     <ClInclude Include="Includes\CTimer.h" />
     <ClInclude Include="Includes\Filters.h" />

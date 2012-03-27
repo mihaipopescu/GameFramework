@@ -13,6 +13,9 @@
 
 extern HINSTANCE g_hInst;
 
+#define PLAYER_START_X 100
+#define PLAYER_START_Y 400
+
 //-----------------------------------------------------------------------------
 // CGameApp Member Functions
 //-----------------------------------------------------------------------------
@@ -26,7 +29,7 @@ CGameApp::CGameApp()
 	m_hWnd			= NULL;
 	m_hIcon			= NULL;
 	m_hMenu			= NULL;
-	m_pBBuffer	= NULL;
+	m_pBBuffer		= NULL;
 	m_pPlayer		= NULL;
 	m_LastFrameRate = 0;
 }
@@ -73,24 +76,24 @@ bool CGameApp::CreateDisplay()
 {
 	LPTSTR			WindowTitle		= _T("GameFramework");
 	LPCSTR			WindowClass		= _T("GameFramework_Class");
-	USHORT			Width					= 800;
-	USHORT			Height				= 600;
-	RECT				rc;
-	WNDCLASSEX	wcex;
+	USHORT			Width			= GetSystemMetrics(SM_CXSCREEN);
+	USHORT			Height			= GetSystemMetrics(SM_CYSCREEN);
+	RECT			rc;
+	WNDCLASSEX		wcex;
 
 
-	wcex.cbSize					= sizeof(WNDCLASSEX);
-	wcex.style					= CS_HREDRAW | CS_VREDRAW;
+	wcex.cbSize				= sizeof(WNDCLASSEX);
+	wcex.style				= CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc		= CGameApp::StaticWndProc;
 	wcex.cbClsExtra			= 0;
 	wcex.cbWndExtra			= 0;
 	wcex.hInstance			= g_hInst;
-	wcex.hIcon					= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
-	wcex.hCursor				= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.hIcon				= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hCursor			= LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground		= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName		= 0;
-	wcex.lpszClassName	= WindowClass;
-	wcex.hIconSm				= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.lpszClassName		= WindowClass;
+	wcex.hIconSm			= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	if(RegisterClassEx(&wcex)==0)
 		return false;
@@ -102,7 +105,7 @@ bool CGameApp::CreateDisplay()
 	m_nViewWidth	= rc.right - rc.left;
 	m_nViewHeight	= rc.bottom - rc.top;
 
-	m_hWnd = CreateWindow(WindowClass, WindowTitle, WS_OVERLAPPEDWINDOW,
+	m_hWnd = CreateWindow(WindowClass, WindowTitle, WS_POPUP,
 		CW_USEDEFAULT, CW_USEDEFAULT, Width, Height, NULL, NULL, g_hInst, this);
 
 	if (!m_hWnd)
@@ -117,7 +120,7 @@ bool CGameApp::CreateDisplay()
 
 //-----------------------------------------------------------------------------
 // Name : BeginGame ()
-// Desc : Signals the beginning of the physical post-initialisation stage.
+// Desc : Signals the beginning of the physical post-initialization stage.
 //		From here on, the game engine has control over processing.
 //-----------------------------------------------------------------------------
 int CGameApp::BeginGame()
@@ -127,7 +130,7 @@ int CGameApp::BeginGame()
 	// Start main loop
 	while(true) 
 	{
-		// Did we recieve a message, or are we idling ?
+		// Did we receive a message, or are we idling ?
 		if ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) 
 		{
 			if (msg.message == WM_QUIT) break;
@@ -157,12 +160,12 @@ bool CGameApp::ShutDown()
 	
 	// Destroy menu, it may not be attached
 	if ( m_hMenu ) DestroyMenu( m_hMenu );
-	m_hMenu		 = NULL;
+	m_hMenu = NULL;
 
 	// Destroy the render window
 	SetMenu( m_hWnd, NULL );
 	if ( m_hWnd ) DestroyWindow( m_hWnd );
-	m_hWnd		  = NULL;
+	m_hWnd = NULL;
 	
 	// Shutdown Success
 	return true;
@@ -272,10 +275,13 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 bool CGameApp::BuildObjects()
 {
 	m_pBBuffer = new BackBuffer(m_hWnd, m_nViewWidth, m_nViewHeight);
-	m_pPlayer = new CPlayer(m_pBBuffer);
+	m_pPlayer = new CPlayer();
 
 	if(!m_imgBackground.LoadBitmapFromFile("data/background.bmp", GetDC(m_hWnd)))
 		return false;
+
+	m_imgBackground.SetFilter(new CBoxFilter());
+	m_imgBackground.Resample(m_nViewWidth, m_nViewHeight);
 
 	// Success!
 	return true;
@@ -287,7 +293,7 @@ bool CGameApp::BuildObjects()
 //-----------------------------------------------------------------------------
 void CGameApp::SetupGameState()
 {
-	m_pPlayer->Position() = Vec2(100, 400);
+	m_pPlayer->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
 }
 
 //-----------------------------------------------------------------------------
@@ -401,9 +407,10 @@ void CGameApp::DrawObjects()
 {
 	m_pBBuffer->reset();
 
-	m_imgBackground.Paint(m_pBBuffer->getDC(), 0, 0);
+	HDC hdc = m_pBBuffer->getDC();
 
-	m_pPlayer->Draw();
+	m_imgBackground.Paint(hdc, 0, 0);
+	m_pPlayer->Draw(hdc);
 
 	m_pBBuffer->present();
 }

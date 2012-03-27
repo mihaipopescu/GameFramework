@@ -1,10 +1,8 @@
 #include "AnimatedSprite.h"
 
 
-void AnimatedSprite::Initialize(const BackBuffer * bb, const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration)
+void AnimatedSprite::Initialize(const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration)
 {
-	Sprite::setBackBuffer(bb);
-
 	myFrameStartCrop.x = rcFirstFrame.left;
 	myFrameStartCrop.y = rcFirstFrame.top;
 	Sprite::myFrameWidth = rcFirstFrame.right - rcFirstFrame.left;

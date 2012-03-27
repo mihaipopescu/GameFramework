@@ -83,13 +83,13 @@ CWeightsTable::CWeightsTable(CGenericFilter *pFilter, DWORD uDstSize, DWORD uSrc
 
 CWeightsTable::~CWeightsTable() 
 {
-		for(DWORD u = 0; u < m_LineLength; u++) 
-		{
-				// free contributions for every pixel
-				delete []m_WeightTable[u].Weights;
-		}
+	for(DWORD u = 0; u < m_LineLength; u++) 
+	{
+			// free contributions for every pixel
+			delete []m_WeightTable[u].Weights;
+	}
 
-		// free list of pixels contributions
-		delete []m_WeightTable;
+	// free list of pixels contributions
+	delete []m_WeightTable;
 }
 

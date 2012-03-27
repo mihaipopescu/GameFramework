@@ -16,7 +16,7 @@
 #include "CTimer.h"
 #include "CPlayer.h"
 #include "BackBuffer.h"
-#include "ImageFile.h"
+#include "ResizableImage.h"
 
 //-----------------------------------------------------------------------------
 // Forward Declarations
@@ -36,7 +36,7 @@ public:
 	//-------------------------------------------------------------------------
 	// Constructors & Destructors for This Class.
 	//-------------------------------------------------------------------------
-					CGameApp();
+			CGameApp();
 	virtual ~CGameApp();
 
 	//-------------------------------------------------------------------------
@@ -52,13 +52,13 @@ private:
 	// Private Functions for This Class
 	//-------------------------------------------------------------------------
 	bool		BuildObjects	( );
-	void		ReleaseObjects( );
+	void		ReleaseObjects	( );
 	void		FrameAdvance	( );
 	bool		CreateDisplay	( );
 	void		ChangeDevice	( );
-	void		SetupGameState( );
-	void		AnimateObjects( );
-	void		DrawObjects	  ( );
+	void		SetupGameState	( );
+	void		AnimateObjects	( );
+	void		DrawObjects		( );
 	void		ProcessInput	( );
 	
 	//-------------------------------------------------------------------------
@@ -69,27 +69,27 @@ private:
 	//-------------------------------------------------------------------------
 	// Private Variables For This Class
 	//-------------------------------------------------------------------------
-	CTimer			m_Timer;					// Game timer
+	CTimer				m_Timer;			// Game timer
 	ULONG				m_LastFrameRate;	// Used for making sure we update only when fps changes.
 	
-	HWND				m_hWnd;						// Main window HWND
-	HICON				m_hIcon;					// Window Icon
-	HMENU				m_hMenu;					// Window Menu
+	HWND				m_hWnd;				// Main window HWND
+	HICON				m_hIcon;			// Window Icon
+	HMENU				m_hMenu;			// Window Menu
 	
-	bool				m_bActive;				// Is the application active ?
+	bool				m_bActive;			// Is the application active ?
 
-	ULONG				m_nViewX;					// X Position of render viewport
-	ULONG				m_nViewY;					// Y Position of render viewport
-	ULONG				m_nViewWidth;			// Width of render viewport
-	ULONG				m_nViewHeight;	  // Height of render viewport
+	ULONG				m_nViewX;			// X Position of render viewport
+	ULONG				m_nViewY;			// Y Position of render viewport
+	ULONG				m_nViewWidth;		// Width of render viewport
+	ULONG				m_nViewHeight;		// Height of render viewport
 
 	POINT				m_OldCursorPos;		// Old cursor position for tracking
-	HINSTANCE		m_hInstance;
+	HINSTANCE			m_hInstance;		// Window instance
 
-	CImageFile	m_imgBackground;
+	CResizableImage		m_imgBackground;
 
-	BackBuffer*	m_pBBuffer;
-	CPlayer*		m_pPlayer;
+	BackBuffer*			m_pBBuffer;
+	CPlayer*			m_pPlayer;
 };
 
 #endif // _CGAMEAPP_H_

@@ -10,9 +10,9 @@
 
 #include "main.h"
 #include "Vec2.h"
-#include "BackBuffer.h"
+#include "CGameObject.h"
 
-class Sprite
+class Sprite : public CGameObject
 {
 public:
 	Sprite(int imageID, int maskID);
@@ -21,13 +21,12 @@ public:
 
 	virtual ~Sprite();
 
-	int GetWidth() { return myBitmap.bmWidth; }
-	int GetHeight() { return myBitmap.bmHeight; }
+	int GetWidth() const { return myBitmap.bmWidth; }
+	int GetHeight() const { return myBitmap.bmHeight; }
 
+	void Setup(HDC hdc);
 	virtual void Update(float dt);
-	virtual void Draw();
-
-	void setBackBuffer(const BackBuffer *pBackBuffer);
+	virtual void Draw(HDC hBackBufferDC) const;
 	
 public:
 	// Keep these public because they need to be
@@ -44,12 +43,10 @@ private:
 	Sprite& operator=(const Sprite& rhs);
 
 protected:
-	void drawTransparent();
-	void drawMask();
+	void drawTransparent(HDC hBackBufferDC) const;
+	void drawMask(HDC hBackBufferDC) const;
 
 protected:
-	const BackBuffer *myBackBuffer;
-
 	HBITMAP myImage;
 	HBITMAP myImageMask;
 	BITMAP myBitmap;

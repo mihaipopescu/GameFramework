@@ -95,6 +95,9 @@
     <ClInclude Include="Includes\WeightsTable.h">
       <Filter>Resize</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\CGameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\directx.ico">
