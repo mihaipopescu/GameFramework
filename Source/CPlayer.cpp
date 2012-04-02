@@ -31,7 +31,7 @@ CPlayer::CPlayer()
 	r.bottom = 128;
 
 	m_pExplosionSprite	= new AnimatedSprite("data/explosion.bmp", "data/explosionmask.bmp");
-	m_pExplosionSprite->Initialize(r, 16, 2 / 16.f);
+	m_pExplosionSprite->Initialize(r, 16, 1 / 16.f);
 	m_bExplosion		= false;
 }
 

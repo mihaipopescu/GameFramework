@@ -10,6 +10,9 @@
 // CGameApp Specific Includes
 //-----------------------------------------------------------------------------
 #include "CGameApp.h"
+#include "CPlayer.h"
+#include <algorithm>
+
 
 extern HINSTANCE g_hInst;
 
@@ -30,7 +33,6 @@ CGameApp::CGameApp()
 	m_hIcon			= NULL;
 	m_hMenu			= NULL;
 	m_pBBuffer		= NULL;
-	m_pPlayer		= NULL;
 	m_LastFrameRate = 0;
 }
 
@@ -46,7 +48,7 @@ CGameApp::~CGameApp()
 
 //-----------------------------------------------------------------------------
 // Name : InitInstance ()
-// Desc : Initialises the entire Engine here.
+// Desc : Initializes the entire Engine here.
 //-----------------------------------------------------------------------------
 bool CGameApp::InitInstance( LPCTSTR lpCmdLine, int iCmdShow )
 {
@@ -252,7 +254,7 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 				PostQuitMessage(0);
 				break;
 			case VK_RETURN:
-				m_pPlayer->Explode();
+				m_pPlayer.lock()->Explode();
 				break;
 			}
 			break;
@@ -275,7 +277,10 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 bool CGameApp::BuildObjects()
 {
 	m_pBBuffer = new BackBuffer(m_hWnd, m_nViewWidth, m_nViewHeight);
-	m_pPlayer = new CPlayer();
+
+	auto pPlayer = std::make_shared<CPlayer>();
+	m_vGameObjects.push_back(pPlayer);
+	m_pPlayer = pPlayer;
 
 	if(!m_imgBackground.LoadBitmapFromFile("data/background.bmp", GetDC(m_hWnd)))
 		return false;
@@ -293,7 +298,7 @@ bool CGameApp::BuildObjects()
 //-----------------------------------------------------------------------------
 void CGameApp::SetupGameState()
 {
-	m_pPlayer->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
+	m_pPlayer.lock()->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
 }
 
 //-----------------------------------------------------------------------------
@@ -303,11 +308,8 @@ void CGameApp::SetupGameState()
 //-----------------------------------------------------------------------------
 void CGameApp::ReleaseObjects( )
 {
-	if(m_pPlayer != NULL)
-	{
-		delete m_pPlayer;
-		m_pPlayer = NULL;
-	}
+	// this will automatically call the d-tors for each shared pointer objects
+	m_vGameObjects.clear();
 
 	if(m_pBBuffer != NULL)
 	{
@@ -326,7 +328,7 @@ void CGameApp::FrameAdvance()
 	static TCHAR TitleBuffer[ 255 ];
 
 	// Advance the timer
-	m_Timer.Tick( );
+	m_Timer.Tick( 60 );
 
 	// Skip if app is inactive
 	if ( !m_bActive ) return;
@@ -372,7 +374,7 @@ void CGameApp::ProcessInput( )
 
 	
 	// Move the player
-	m_pPlayer->Move(Direction);
+	m_pPlayer.lock()->Move(Direction);
 
 
 	// Now process the mouse (if the button is pressed)
@@ -396,7 +398,11 @@ void CGameApp::ProcessInput( )
 //-----------------------------------------------------------------------------
 void CGameApp::AnimateObjects()
 {
-	m_pPlayer->Update(m_Timer.GetTimeElapsed());
+	ExpiredPredicate expiredPred;
+	m_vGameObjects.erase(std::remove_if(m_vGameObjects.begin(), m_vGameObjects.end(), expiredPred), m_vGameObjects.end());
+
+	UpdateFunctor updateFn(m_Timer.GetTimeElapsed());
+	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), updateFn);
 }
 
 //-----------------------------------------------------------------------------
@@ -410,7 +416,9 @@ void CGameApp::DrawObjects()
 	HDC hdc = m_pBBuffer->getDC();
 
 	m_imgBackground.Paint(hdc, 0, 0);
-	m_pPlayer->Draw(hdc);
+
+	DrawFunctor drawFn(hdc);
+	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), drawFn);
 
 	m_pBBuffer->present();
 }

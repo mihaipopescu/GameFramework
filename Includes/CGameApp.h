@@ -15,8 +15,11 @@
 #include "Main.h"
 #include "CTimer.h"
 #include "CPlayer.h"
+#include "CGameObject.h"
 #include "BackBuffer.h"
 #include "ResizableImage.h"
+#include <vector>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 // Forward Declarations
@@ -42,7 +45,7 @@ public:
 	//-------------------------------------------------------------------------
 	// Public Functions for This Class
 	//-------------------------------------------------------------------------
-	LRESULT	DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam );
+	LRESULT		DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam );
 	bool		InitInstance( LPCTSTR lpCmdLine, int iCmdShow );
 	int			BeginGame( );
 	bool		ShutDown( );
@@ -89,7 +92,9 @@ private:
 	CResizableImage		m_imgBackground;
 
 	BackBuffer*			m_pBBuffer;
-	CPlayer*			m_pPlayer;
+
+	std::vector<std::shared_ptr<CGameObject>> m_vGameObjects;
+	std::weak_ptr<CPlayer> m_pPlayer;
 };
 
 #endif // _CGAMEAPP_H_

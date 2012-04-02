@@ -42,12 +42,18 @@ bool CImageFile::LoadBitmapFromFile(const char *szFileName, HDC hdc)
 	// send NULL to bits to get the bitmap info
 	GetDIBits(mdc, myBitmap, 0, 0, NULL, (BITMAPINFO*)&myBMPInfo, DIB_RGB_COLORS);
 
+	// data alignment fix (loose some pixels but you can load the image correct)
+	if( myBMPInfo.biBitCount == 24 )
+	{
+		myBMPInfo.biWidth -= myBMPInfo.biWidth % 4;
+	}
+
 	pData = new BYTE[myBMPInfo.biSizeImage];
 
 	// read the bitmap data
 	// NOTE: We use this method to access the bitmap bits in order to modify them
 	// applying different filters or other image processing algorithms in real time 
-	// such as blur effect (denoising) or other convolutions.
+	// such as blur effect (de-noising) or other convolutions.
 	GetDIBits(mdc, myBitmap, 0, myHeight, pData, (BITMAPINFO*)&myBMPInfo, DIB_RGB_COLORS);
 
 	myRGBArray = new RGBQUAD[myWidth * myHeight];

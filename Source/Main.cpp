@@ -29,6 +29,8 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLi
 	// Enable Memory Leak Checking
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
+	//_crtBreakAlloc = 87;
+
 	// initialize global instance
 	g_hInst = hInstance;
 

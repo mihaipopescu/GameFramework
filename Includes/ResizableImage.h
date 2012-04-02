@@ -16,7 +16,7 @@ class CResizableImage : public CImageFile
 {
 public:
 	CResizableImage() { myFilter = NULL; }
-	virtual ~CResizableImage() {}
+	virtual ~CResizableImage() { if(myFilter) delete myFilter; }
 
 	void SetFilter(CGenericFilter *pFilter) { myFilter = pFilter; }
 

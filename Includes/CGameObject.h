@@ -9,6 +9,7 @@
 #ifndef GAME_OBJECT_H
 #define GAME_OBJECT_H
 #include <Windows.h>
+#include <memory>
 
 enum GameObjectType
 {
@@ -33,7 +34,7 @@ public:
 class ExpiredPredicate
 {
 public:
-	bool operator()(const CGameObject * object) const
+	bool operator()(const std::shared_ptr<CGameObject>& object) const
 	{
 		return object->Expired();
 	}
@@ -43,7 +44,7 @@ class UpdateFunctor
 {
 public:
 	UpdateFunctor(float dt) : myDt(dt) { }
-	void operator()(CGameObject * object)
+	void operator()(std::shared_ptr<CGameObject>& object)
 	{
 		object->Update(myDt);
 	}
@@ -55,7 +56,7 @@ class DrawFunctor
 {
 public:
 	DrawFunctor(HDC hdc) : myHDC(hdc) { }
-	void operator()(const CGameObject * object)
+	void operator()(const std::shared_ptr<CGameObject>& object)
 	{
 		object->Draw(myHDC);
 	}
