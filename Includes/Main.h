@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 #define CAPS1			94
 #define C1_TRANSPARENT	1
-
+#define GCONST 10
 
 #define EPS 1e-3 // epsilon (the smallest float value used)
 #define PI 3.14159265358979323846

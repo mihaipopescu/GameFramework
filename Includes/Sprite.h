@@ -12,6 +12,7 @@
 #include "Vec2.h"
 #include "CGameObject.h"
 
+
 class Sprite : public CGameObject
 {
 public:
@@ -33,6 +34,7 @@ public:
 	// modified externally frequently.
 	Vec2 myPosition;
 	Vec2 myVelocity;
+	Vec2 myAcceleration;
 
 private:
 	// Make copy constructor and assignment operator private

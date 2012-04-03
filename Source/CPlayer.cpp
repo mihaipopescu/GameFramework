@@ -120,17 +120,19 @@ void CPlayer::Draw(HDC hdc) const
 
 void CPlayer::Move(ULONG ulDirection)
 {
+	m_pSprite->myAcceleration = Vec2();
+
 	if( ulDirection & CPlayer::DIR_LEFT )
-		m_pSprite->myVelocity.x -= .1;
+		m_pSprite->myAcceleration.x = -2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_RIGHT )
-		m_pSprite->myVelocity.x += .1;
+		m_pSprite->myAcceleration.x = 2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_FORWARD )
-		m_pSprite->myVelocity.y -= .1;
+		m_pSprite->myAcceleration.y = -2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_BACKWARD )
-		m_pSprite->myVelocity.y += .1;
+		m_pSprite->myAcceleration.y = 2 * GCONST;
 }
 
 

@@ -8,6 +8,7 @@
 
 #include "Sprite.h"
 
+
 extern HINSTANCE g_hInst;
 
 Sprite::Sprite(int imageID, int maskID)
@@ -86,9 +87,15 @@ void Sprite::Setup(HDC hBackBufferDC)
 
 void Sprite::Update(float dt)
 {
-	// Update the sprites position.
+	Vec2 a(0, GCONST);
 
-	myPosition += myVelocity * dt;
+	// compute resultant acceleration
+	a += myAcceleration;
+
+	// Update the sprites position and speed
+	myPosition += myVelocity * dt + a * dt * dt / 2;
+	myVelocity += a * dt;
+
 	// Update bounding rectangle/circle
 }
 
