@@ -8,7 +8,8 @@
 
 #ifndef GAME_OBJECT_H
 #define GAME_OBJECT_H
-#include <Windows.h>
+#include "Vec2.h"
+#include "main.h"
 #include <memory>
 
 enum GameObjectType
@@ -25,9 +26,18 @@ public:
 	virtual ~CGameObject() { }
 
 	virtual GameObjectType GetObjectType() const { return GOT_Invalid; }
-	virtual void Update(float dt) = 0;
+	virtual void Update(float dt);
 	virtual void Draw(HDC hdc) const = 0;
 	virtual bool Expired() const { return false; }
+	virtual int GetWidth() const = 0;
+	virtual int GetHeight() const = 0;
+
+public:
+	// Keep these public because they need to be
+	// modified externally frequently.
+	Vec2 myPosition;
+	Vec2 myVelocity;
+	Vec2 myAcceleration;
 };
 
 

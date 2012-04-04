@@ -63,6 +63,7 @@ private:
 	void		AnimateObjects	( );
 	void		DrawObjects		( );
 	void		ProcessInput	( );
+	void		CollisionDetection();
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class

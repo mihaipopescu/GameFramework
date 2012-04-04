@@ -345,6 +345,9 @@ void CGameApp::FrameAdvance()
 	// Poll & Process input devices
 	ProcessInput();
 
+	// Collision detection between game objects
+	CollisionDetection();
+
 	// Animate the game objects
 	AnimateObjects();
 
@@ -421,4 +424,61 @@ void CGameApp::DrawObjects()
 	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), drawFn);
 
 	m_pBBuffer->present();
+}
+
+//-----------------------------------------------------------------------------
+// Name : CollisionDetection () (Private)
+// Desc : Detects and handles collision
+//-----------------------------------------------------------------------------
+void CGameApp::CollisionDetection()
+{
+	// collision detection with the main frame
+	for(auto it = m_vGameObjects.begin(); it != m_vGameObjects.end(); ++it)
+	{
+		CGameObject * pGameObj = it->get();
+		Vec2 pos = pGameObj->myPosition;
+
+		// on collision with objects we have to apply the third fundamental law of motion
+		// F_Reaction = F_Action
+
+		bool bCollisionX = false;
+
+		if( pos.x < pGameObj->GetWidth() / 2 )
+		{
+			pGameObj->myPosition.x = pGameObj->GetWidth() / 2;
+			bCollisionX = true;	
+		}
+
+		if( pos.x > m_nViewWidth - pGameObj->GetHeight() / 2 )
+		{
+			pGameObj->myPosition.x = m_nViewWidth - pGameObj->GetHeight() / 2;
+			bCollisionX = true;
+		}
+
+		if( bCollisionX )
+		{
+			pGameObj->myVelocity.x = 0;
+			pGameObj->myAcceleration.x = -pGameObj->myAcceleration.x;
+		}
+
+		bool bCollisionY = false;
+		
+		if( pos.y < pGameObj->GetHeight() / 2 )
+		{
+			pGameObj->myPosition.y = pGameObj->GetHeight() / 2;
+			bCollisionY = true;
+		}
+
+		if( pos.y > m_nViewHeight - pGameObj->GetHeight() / 2 )
+		{
+			pGameObj->myPosition.y = m_nViewHeight - pGameObj->GetHeight() / 2;
+			bCollisionY = true;	
+		}
+
+		if( bCollisionY )
+		{
+			pGameObj->myVelocity.y = 0;
+			pGameObj->myAcceleration.y = -(pGameObj->myAcceleration.y + GCONST);
+		}
+	}
 }

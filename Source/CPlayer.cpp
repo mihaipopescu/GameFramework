@@ -49,17 +49,19 @@ void CPlayer::Init(HDC hdc, const Vec2& position)
 {
 	m_pSprite->Setup(hdc);
 	m_pExplosionSprite->Setup(hdc);
-	Position() = position;
+	myPosition = position;
 }
 
 void CPlayer::Update(float dt)
 {
+	CGameObject::Update(dt);
+
 	// Update sprites
-	m_pSprite->Update(dt);
+	m_pSprite->myPosition = myPosition;
 	m_pExplosionSprite->Update(dt);
 
 	// Get velocity
-	double v = m_pSprite->myVelocity.Magnitude();
+	double v = myVelocity.Magnitude();
 
 	// NOTE: for each async sound played Windows creates a thread for you
 	// but only one, so you cannot play multiple sounds at once.
@@ -73,7 +75,7 @@ void CPlayer::Update(float dt)
 	if(m_bExplosion && m_pExplosionSprite->IsFinished())
 	{
 		m_bExplosion = false;
-		m_pSprite->myVelocity = Vec2(0,0);
+		myVelocity = Vec2(0,0);
 		m_eSpeedState = SPEED_STOP;
 	}
 
@@ -120,30 +122,19 @@ void CPlayer::Draw(HDC hdc) const
 
 void CPlayer::Move(ULONG ulDirection)
 {
-	m_pSprite->myAcceleration = Vec2();
+	myAcceleration = Vec2();
 
 	if( ulDirection & CPlayer::DIR_LEFT )
-		m_pSprite->myAcceleration.x = -2 * GCONST;
+		myAcceleration.x = -2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_RIGHT )
-		m_pSprite->myAcceleration.x = 2 * GCONST;
+		myAcceleration.x = 2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_FORWARD )
-		m_pSprite->myAcceleration.y = -2 * GCONST;
+		myAcceleration.y = -2 * GCONST;
 
 	if( ulDirection & CPlayer::DIR_BACKWARD )
-		m_pSprite->myAcceleration.y = 2 * GCONST;
-}
-
-
-Vec2& CPlayer::Position()
-{
-	return m_pSprite->myPosition;
-}
-
-Vec2& CPlayer::Velocity()
-{
-	return m_pSprite->myVelocity;
+		myAcceleration.y = 2 * GCONST;
 }
 
 void CPlayer::Explode()

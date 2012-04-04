@@ -54,6 +54,9 @@
     <ClCompile Include="Source\WeightsTable.cpp">
       <Filter>Resize</Filter>
     </ClCompile>
+    <ClCompile Include="Source\CGameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\BackBuffer.h">

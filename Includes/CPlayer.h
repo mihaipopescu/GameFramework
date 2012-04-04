@@ -58,8 +58,8 @@ public:
 	GameObjectType			GetObjectType() const { return GOT_Player; }
 	void					Draw(HDC hdc) const;
 	void					Move(ULONG ulDirection);
-	Vec2&					Position();
-	Vec2&					Velocity();
+	virtual int				GetWidth() const { return m_pSprite->GetWidth(); }
+	virtual int				GetHeight() const { return m_pSprite->GetHeight(); }
 	void					Explode();
 
 private:

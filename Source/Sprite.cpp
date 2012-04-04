@@ -85,20 +85,6 @@ void Sprite::Setup(HDC hBackBufferDC)
 	}
 }
 
-void Sprite::Update(float dt)
-{
-	Vec2 a(0, GCONST);
-
-	// compute resultant acceleration
-	a += myAcceleration;
-
-	// Update the sprites position and speed
-	myPosition += myVelocity * dt + a * dt * dt / 2;
-	myVelocity += a * dt;
-
-	// Update bounding rectangle/circle
-}
-
 void Sprite::Draw(HDC hBackBufferDC) const
 {
 	if( myImageMask != 0 )
@@ -141,12 +127,9 @@ void Sprite::drawMask(HDC hBackBufferDC) const
 
 void Sprite::drawTransparent(HDC hBackBufferDC) const
 {
-	int w = GetWidth();
-	int h = GetHeight();
-
 	// Upper-left corner.
-	int x = (int)myPosition.x - (w / 2);
-	int y = (int)myPosition.y - (h / 2);
+	int x = (int)myPosition.x - (myBitmap.bmWidth / 2);
+	int y = (int)myPosition.y - (myBitmap.bmHeight / 2);
 
 	COLORREF crOldBack = SetBkColor(hBackBufferDC, RGB(255, 255, 255));
 	COLORREF crOldText = SetTextColor(hBackBufferDC, RGB(0, 0, 0));

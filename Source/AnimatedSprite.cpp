@@ -18,6 +18,8 @@ void AnimatedSprite::Initialize(const RECT& rcFirstFrame, int iFrameCount, float
 
 void AnimatedSprite::Update( float dt )
 {
+	CGameObject::Update(dt);
+
 	if( !myInitializedState )
 		return;
 

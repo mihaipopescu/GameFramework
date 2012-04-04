@@ -19,22 +19,13 @@ public:
 	Sprite(int imageID, int maskID);
 	Sprite(const char *szImageFile, const char *szMaskFile);
 	Sprite(const char *szImageFile, COLORREF crTransparentColor);
-
 	virtual ~Sprite();
 
-	int GetWidth() const { return myBitmap.bmWidth; }
-	int GetHeight() const { return myBitmap.bmHeight; }
-
 	void Setup(HDC hdc);
-	virtual void Update(float dt);
+
 	virtual void Draw(HDC hBackBufferDC) const;
-	
-public:
-	// Keep these public because they need to be
-	// modified externally frequently.
-	Vec2 myPosition;
-	Vec2 myVelocity;
-	Vec2 myAcceleration;
+	virtual int GetWidth() const { return myFrameWidth; }
+	virtual int GetHeight() const { return myFrameHeight; }
 
 private:
 	// Make copy constructor and assignment operator private
