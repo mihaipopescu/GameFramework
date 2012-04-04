@@ -31,6 +31,7 @@ public:
 	virtual bool Expired() const { return false; }
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
+	virtual bool AffectedByGravity() const { return true; }
 
 public:
 	// Keep these public because they need to be

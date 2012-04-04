@@ -78,36 +78,36 @@ bool CGameApp::CreateDisplay()
 {
 	LPTSTR			WindowTitle		= _T("GameFramework");
 	LPCSTR			WindowClass		= _T("GameFramework_Class");
-	USHORT			Width			= GetSystemMetrics(SM_CXSCREEN);
-	USHORT			Height			= GetSystemMetrics(SM_CYSCREEN);
-	RECT			rc;
-	WNDCLASSEX		wcex;
+	USHORT			Width					= 800;
+	USHORT			Height				= 600;
+	RECT				rc;
+	WNDCLASSEX	wcex;
 
 
-	wcex.cbSize				= sizeof(WNDCLASSEX);
-	wcex.style				= CS_HREDRAW | CS_VREDRAW;
+	wcex.cbSize					= sizeof(WNDCLASSEX);
+	wcex.style					= CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc		= CGameApp::StaticWndProc;
 	wcex.cbClsExtra			= 0;
 	wcex.cbWndExtra			= 0;
 	wcex.hInstance			= g_hInst;
-	wcex.hIcon				= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
-	wcex.hCursor			= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground		= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.hIcon					= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hCursor				= LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName		= 0;
-	wcex.lpszClassName		= WindowClass;
-	wcex.hIconSm			= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.lpszClassName	= WindowClass;
+	wcex.hIconSm				= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	if(RegisterClassEx(&wcex)==0)
 		return false;
 
 	// Retrieve the final client size of the window
 	::GetClientRect( m_hWnd, &rc );
-	m_nViewX		= rc.left;
-	m_nViewY		= rc.top;
+	m_nViewX			= rc.left;
+	m_nViewY			= rc.top;
 	m_nViewWidth	= rc.right - rc.left;
 	m_nViewHeight	= rc.bottom - rc.top;
 
-	m_hWnd = CreateWindow(WindowClass, WindowTitle, WS_POPUP,
+	m_hWnd = CreateWindow(WindowClass, WindowTitle, WS_OVERLAPPED,
 		CW_USEDEFAULT, CW_USEDEFAULT, Width, Height, NULL, NULL, g_hInst, this);
 
 	if (!m_hWnd)
@@ -143,7 +143,6 @@ int CGameApp::BeginGame()
 		{
 			// Advance Game Frame.
 			FrameAdvance();
-
 		} // End If messages waiting
 	
 	} // Until quit message is received
@@ -339,7 +338,6 @@ void CGameApp::FrameAdvance()
 		m_LastFrameRate = m_Timer.GetFrameRate( FrameRate, 50 );
 		sprintf_s( TitleBuffer, _T("Game : %s"), FrameRate );
 		SetWindowText( m_hWnd, TitleBuffer );
-
 	} // End if Frame Rate Altered
 
 	// Poll & Process input devices
@@ -441,44 +439,28 @@ void CGameApp::CollisionDetection()
 		// on collision with objects we have to apply the third fundamental law of motion
 		// F_Reaction = F_Action
 
-		bool bCollisionX = false;
-
 		if( pos.x < pGameObj->GetWidth() / 2 )
 		{
-			pGameObj->myPosition.x = pGameObj->GetWidth() / 2;
-			bCollisionX = true;	
+			pGameObj->myVelocity.x = 0;
+			pGameObj->myAcceleration.x = fabsf(pGameObj->myAcceleration.x);
 		}
 
 		if( pos.x > m_nViewWidth - pGameObj->GetHeight() / 2 )
 		{
-			pGameObj->myPosition.x = m_nViewWidth - pGameObj->GetHeight() / 2;
-			bCollisionX = true;
-		}
-
-		if( bCollisionX )
-		{
 			pGameObj->myVelocity.x = 0;
-			pGameObj->myAcceleration.x = -pGameObj->myAcceleration.x;
+			pGameObj->myAcceleration.x = -fabsf(pGameObj->myAcceleration.x);
 		}
-
-		bool bCollisionY = false;
 		
-		if( pos.y < pGameObj->GetHeight() / 2 )
-		{
-			pGameObj->myPosition.y = pGameObj->GetHeight() / 2;
-			bCollisionY = true;
-		}
-
-		if( pos.y > m_nViewHeight - pGameObj->GetHeight() / 2 )
-		{
-			pGameObj->myPosition.y = m_nViewHeight - pGameObj->GetHeight() / 2;
-			bCollisionY = true;	
-		}
-
-		if( bCollisionY )
+		if( (int)pos.y < pGameObj->GetHeight() / 2 )
 		{
 			pGameObj->myVelocity.y = 0;
-			pGameObj->myAcceleration.y = -(pGameObj->myAcceleration.y + GCONST);
+			pGameObj->myAcceleration.y = fabsf(pGameObj->myAcceleration.y) - GRAVITATIONAL_CONSTANT;
+		}
+
+		if( (int)pos.y > m_nViewHeight - pGameObj->GetHeight() / 2 )
+		{
+			pGameObj->myVelocity.y = 0;
+			pGameObj->myAcceleration.y = -fabsf(pGameObj->myAcceleration.y) - GRAVITATIONAL_CONSTANT;
 		}
 	}
 }

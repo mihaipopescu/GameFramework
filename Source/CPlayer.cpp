@@ -125,16 +125,16 @@ void CPlayer::Move(ULONG ulDirection)
 	myAcceleration = Vec2();
 
 	if( ulDirection & CPlayer::DIR_LEFT )
-		myAcceleration.x = -2 * GCONST;
+		myAcceleration.x = -5 * GRAVITATIONAL_CONSTANT;
 
 	if( ulDirection & CPlayer::DIR_RIGHT )
-		myAcceleration.x = 2 * GCONST;
+		myAcceleration.x = 5 * GRAVITATIONAL_CONSTANT;
 
 	if( ulDirection & CPlayer::DIR_FORWARD )
-		myAcceleration.y = -2 * GCONST;
+		myAcceleration.y = -5 * GRAVITATIONAL_CONSTANT;
 
 	if( ulDirection & CPlayer::DIR_BACKWARD )
-		myAcceleration.y = 2 * GCONST;
+		myAcceleration.y = 5 * GRAVITATIONAL_CONSTANT;
 }
 
 void CPlayer::Explode()

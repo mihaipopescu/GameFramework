@@ -32,10 +32,10 @@ public:
 protected:
 	bool myInitializedState;	//!< tells if the class is initialized
 	float myFrameDuration;		//!< how much a frame 
-	float myFrameTimer;			//!< time accumulator
+	float myFrameTimer;				//!< time accumulator
 	POINT myFrameStartCrop;		//!< first point of the frame (upper-left corner)
-	int myFrameCount;			//!< number of frames
-	int myFrameIndex;			//!< current frame number
+	int myFrameCount;					//!< number of frames
+	int myFrameIndex;					//!< current frame number
 };
 
 #endif // ANIMATED_SPRITE_H
