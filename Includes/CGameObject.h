@@ -20,10 +20,20 @@ enum GameObjectType
 	GOT_Crate,
 };
 
+enum CollisionSide
+{
+    CS_None = 0,
+    CS_Left = 1,
+    CS_Right = 2,
+    CS_Top = 4,
+    CS_Bottom = 8
+};
+
 class CGameObject
 {
 public:
-	virtual ~CGameObject() { }
+    CGameObject();
+    virtual ~CGameObject();
 
 	virtual GameObjectType GetObjectType() const { return GOT_Invalid; }
 	virtual void Update(float dt);
@@ -39,6 +49,12 @@ public:
 	Vec2 myPosition;
 	Vec2 myVelocity;
 	Vec2 myAcceleration;
+    int myCollisionSide;
+
+private:
+    HPEN mySpeedPen;
+    HPEN myAccelerationPen;
+    Vec2 myResultant;
 };
 
 

@@ -436,31 +436,30 @@ void CGameApp::CollisionDetection()
 		CGameObject * pGameObj = it->get();
 		Vec2 pos = pGameObj->myPosition;
 
-		// on collision with objects we have to apply the third fundamental law of motion
-		// F_Reaction = F_Action
+        pGameObj->myCollisionSide = CS_None;
 
-		if( pos.x < pGameObj->GetWidth() / 2 )
+        int dx = pos.x - pGameObj->GetWidth() / 2;
+		if( dx < 0 )
 		{
-			pGameObj->myVelocity.x = 0;
-			pGameObj->myAcceleration.x = fabsf(pGameObj->myAcceleration.x);
+			pGameObj->myCollisionSide |= CS_Left;
 		}
 
-		if( pos.x > m_nViewWidth - pGameObj->GetHeight() / 2 )
+        dx = pos.x - (m_nViewWidth - pGameObj->GetWidth() / 2);
+		if( dx > 0 )
 		{
-			pGameObj->myVelocity.x = 0;
-			pGameObj->myAcceleration.x = -fabsf(pGameObj->myAcceleration.x);
+			pGameObj->myCollisionSide |= CS_Right;
 		}
 		
-		if( (int)pos.y < pGameObj->GetHeight() / 2 )
+        int dy = pos.y - pGameObj->GetHeight() / 2;
+		if( dy < 0 )
 		{
-			pGameObj->myVelocity.y = 0;
-			pGameObj->myAcceleration.y = fabsf(pGameObj->myAcceleration.y) - GRAVITATIONAL_CONSTANT;
+			pGameObj->myCollisionSide |= CS_Top;
 		}
 
-		if( (int)pos.y > m_nViewHeight - pGameObj->GetHeight() / 2 )
+        dy = pos.y - (m_nViewHeight - pGameObj->GetHeight() / 2);
+		if( dy > 0 )
 		{
-			pGameObj->myVelocity.y = 0;
-			pGameObj->myAcceleration.y = -fabsf(pGameObj->myAcceleration.y) - GRAVITATIONAL_CONSTANT;
+			pGameObj->myCollisionSide |= CS_Bottom;
 		}
 	}
 }

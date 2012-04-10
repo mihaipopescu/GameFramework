@@ -80,31 +80,31 @@ void CPlayer::Update(float dt)
 	}
 
 	// A FSM is used for sound manager 
-	switch(m_eSpeedState)
-	{
-	case SPEED_STOP:
-		if(v > 35.0f)
-		{
-			m_eSpeedState = SPEED_START;
-			PlaySound("data/jet-start.wav", NULL, SND_FILENAME | SND_ASYNC);
-			m_fTimer = 0;
-		}
-		break;
-	case SPEED_START:
-		if(v < 25.0f)
-		{
-			m_eSpeedState = SPEED_STOP;
-			PlaySound("data/jet-stop.wav", NULL, SND_FILENAME | SND_ASYNC);
-			m_fTimer = 0;
-		}
-		else
-			if(m_fTimer > 1.f)
-			{
-				PlaySound("data/jet-cabin.wav", NULL, SND_FILENAME | SND_ASYNC);
-				m_fTimer = 0;
-			}
-		break;
-	}
+	//switch(m_eSpeedState)
+	//{
+	//case SPEED_STOP:
+	//	if(v > 35.0f)
+	//	{
+	//		m_eSpeedState = SPEED_START;
+	//		PlaySound("data/jet-start.wav", NULL, SND_FILENAME | SND_ASYNC);
+	//		m_fTimer = 0;
+	//	}
+	//	break;
+	//case SPEED_START:
+	//	if(v < 25.0f)
+	//	{
+	//		m_eSpeedState = SPEED_STOP;
+	//		PlaySound("data/jet-stop.wav", NULL, SND_FILENAME | SND_ASYNC);
+	//		m_fTimer = 0;
+	//	}
+	//	else
+	//		if(m_fTimer > 1.f)
+	//		{
+	//			PlaySound("data/jet-cabin.wav", NULL, SND_FILENAME | SND_ASYNC);
+	//			m_fTimer = 0;
+	//		}
+	//	break;
+	//}
 
 	// NOTE: For sound you also can use MIDI but it's Win32 API it is a bit hard
 	// see MSDN reference: http://msdn.microsoft.com/en-us/library/ms711640.aspx
@@ -114,10 +114,12 @@ void CPlayer::Update(float dt)
 
 void CPlayer::Draw(HDC hdc) const
 {
-	if(!m_bExplosion)
+    if(!m_bExplosion)
 		m_pSprite->Draw(hdc);
 	else
 		m_pExplosionSprite->Draw(hdc);
+
+    CGameObject::Draw(hdc);
 }
 
 void CPlayer::Move(ULONG ulDirection)
