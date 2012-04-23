@@ -17,7 +17,7 @@ public:
 
 public:
 	//! Initialization function
-	void Initialize(const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration);
+	void Initialize(HDC hdc, const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration);
 	//! Returns the current frame count
 	int GetFrameCount() { return myFrameCount; }
 	//! Starts playing the animated sprite

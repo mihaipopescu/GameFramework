@@ -33,6 +33,7 @@ CGameApp::CGameApp()
 	m_hIcon			= NULL;
 	m_hMenu			= NULL;
 	m_pBBuffer		= NULL;
+    m_pParallax     = NULL;
 	m_LastFrameRate = 0;
 }
 
@@ -76,36 +77,36 @@ bool CGameApp::InitInstance( LPCTSTR lpCmdLine, int iCmdShow )
 //-----------------------------------------------------------------------------
 bool CGameApp::CreateDisplay()
 {
-	LPTSTR			WindowTitle		= _T("GameFramework");
-	LPCSTR			WindowClass		= _T("GameFramework_Class");
-	USHORT			Width					= 800;
-	USHORT			Height				= 600;
-	RECT				rc;
-	WNDCLASSEX	wcex;
+	LPTSTR      WindowTitle = _T("GameFramework");
+	LPCSTR      WindowClass = _T("GameFramework_Class");
+	USHORT      Width       = 800;
+	USHORT      Height      = 600;
+	RECT        rc;
+	WNDCLASSEX  wcex;
 
 
-	wcex.cbSize					= sizeof(WNDCLASSEX);
-	wcex.style					= CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc		= CGameApp::StaticWndProc;
-	wcex.cbClsExtra			= 0;
-	wcex.cbWndExtra			= 0;
-	wcex.hInstance			= g_hInst;
-	wcex.hIcon					= LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
-	wcex.hCursor				= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszMenuName		= 0;
-	wcex.lpszClassName	= WindowClass;
-	wcex.hIconSm				= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.cbSize         = sizeof(WNDCLASSEX);
+	wcex.style          = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc    = CGameApp::StaticWndProc;
+	wcex.cbClsExtra     = 0;
+	wcex.cbWndExtra     = 0;
+	wcex.hInstance      = g_hInst;
+	wcex.hIcon          = LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName   = 0;
+	wcex.lpszClassName  = WindowClass;
+	wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
 
 	if(RegisterClassEx(&wcex)==0)
 		return false;
 
 	// Retrieve the final client size of the window
 	::GetClientRect( m_hWnd, &rc );
-	m_nViewX			= rc.left;
-	m_nViewY			= rc.top;
-	m_nViewWidth	= rc.right - rc.left;
-	m_nViewHeight	= rc.bottom - rc.top;
+	m_nViewX        = rc.left;
+	m_nViewY        = rc.top;
+	m_nViewWidth    = rc.right - rc.left;
+	m_nViewHeight   = rc.bottom - rc.top;
 
 	m_hWnd = CreateWindow(WindowClass, WindowTitle, WS_OVERLAPPED,
 		CW_USEDEFAULT, CW_USEDEFAULT, Width, Height, NULL, NULL, g_hInst, this);
@@ -287,6 +288,8 @@ bool CGameApp::BuildObjects()
 	m_imgBackground.SetFilter(new CBoxFilter());
 	m_imgBackground.Resample(m_nViewWidth, m_nViewHeight);
 
+    m_pParallax = new ParallaxLayer("data/tile.bmp");
+
 	// Success!
 	return true;
 }
@@ -298,6 +301,9 @@ bool CGameApp::BuildObjects()
 void CGameApp::SetupGameState()
 {
 	m_pPlayer.lock()->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
+    
+    m_pParallax->Initialize(m_pBBuffer->getDC(), ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, 30, m_nViewWidth, m_nViewHeight);
+    m_pParallax->myPosition = Vec2(m_pParallax->GetWidth()/2, m_pParallax->GetHeight()/2);
 }
 
 //-----------------------------------------------------------------------------
@@ -310,11 +316,8 @@ void CGameApp::ReleaseObjects( )
 	// this will automatically call the d-tors for each shared pointer objects
 	m_vGameObjects.clear();
 
-	if(m_pBBuffer != NULL)
-	{
-		delete m_pBBuffer;
-		m_pBBuffer = NULL;
-	}
+	SAFE_DELETE(m_pBBuffer);
+    SAFE_DELETE(m_pParallax);
 }
 
 //-----------------------------------------------------------------------------
@@ -402,8 +405,13 @@ void CGameApp::AnimateObjects()
 	ExpiredPredicate expiredPred;
 	m_vGameObjects.erase(std::remove_if(m_vGameObjects.begin(), m_vGameObjects.end(), expiredPred), m_vGameObjects.end());
 
-	UpdateFunctor updateFn(m_Timer.GetTimeElapsed());
+    float dt = m_Timer.GetTimeElapsed();
+
+	UpdateFunctor updateFn(dt);
 	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), updateFn);
+
+    m_pParallax->Move(CPlayer::DIR_FORWARD);
+    m_pParallax->Update(dt);
 }
 
 //-----------------------------------------------------------------------------
@@ -416,11 +424,14 @@ void CGameApp::DrawObjects()
 
 	HDC hdc = m_pBBuffer->getDC();
 
-	m_imgBackground.Paint(hdc, 0, 0);
+    m_imgBackground.Paint(hdc, 0, 0);
+
+    m_pParallax->Draw(hdc);
 
 	DrawFunctor drawFn(hdc);
 	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), drawFn);
 
+    
 	m_pBBuffer->present();
 }
 
@@ -438,25 +449,25 @@ void CGameApp::CollisionDetection()
 
         pGameObj->myCollisionSide = CS_None;
 
-        int dx = pos.x - pGameObj->GetWidth() / 2;
+        int dx = (int)pos.x - pGameObj->GetWidth() / 2;
 		if( dx < 0 )
 		{
 			pGameObj->myCollisionSide |= CS_Left;
 		}
 
-        dx = pos.x - (m_nViewWidth - pGameObj->GetWidth() / 2);
+        dx = (int)pos.x - (m_nViewWidth - pGameObj->GetWidth() / 2);
 		if( dx > 0 )
 		{
 			pGameObj->myCollisionSide |= CS_Right;
 		}
 		
-        int dy = pos.y - pGameObj->GetHeight() / 2;
+        int dy = (int)pos.y - pGameObj->GetHeight() / 2;
 		if( dy < 0 )
 		{
 			pGameObj->myCollisionSide |= CS_Top;
 		}
 
-        dy = pos.y - (m_nViewHeight - pGameObj->GetHeight() / 2);
+        dy = (int)pos.y - (m_nViewHeight - pGameObj->GetHeight() / 2);
 		if( dy > 0 )
 		{
 			pGameObj->myCollisionSide |= CS_Bottom;

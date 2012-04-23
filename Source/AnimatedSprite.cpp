@@ -1,8 +1,10 @@
 #include "AnimatedSprite.h"
 
 
-void AnimatedSprite::Initialize(const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration)
+void AnimatedSprite::Initialize(HDC hdc, const RECT& rcFirstFrame, int iFrameCount, float fFrameDuration)
 {
+    Sprite::Initialize(hdc);
+
 	myFrameStartCrop.x = rcFirstFrame.left;
 	myFrameStartCrop.y = rcFirstFrame.top;
 	Sprite::myFrameWidth = rcFirstFrame.right - rcFirstFrame.left;

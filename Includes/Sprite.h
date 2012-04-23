@@ -17,13 +17,16 @@ class Sprite : public CGameObject
 {
 public:
 	Sprite(int imageID, int maskID);
-	Sprite(const char *szImageFile, const char *szMaskFile);
+	Sprite(const char *szImageFile);
+    Sprite(const char *szImageFile, const char *szMaskFile);
 	Sprite(const char *szImageFile, COLORREF crTransparentColor);
 	virtual ~Sprite();
 
-	void Setup(HDC hdc);
+	void Initialize(HDC hdc);
 
 	virtual void Draw(HDC hBackBufferDC) const;
+    void DrawWithOffset(HDC hBackBufferDC, int dx, int dy) const;
+
 	virtual int GetWidth() const { return myFrameWidth; }
 	virtual int GetHeight() const { return myFrameHeight; }
 
@@ -36,8 +39,9 @@ private:
 	Sprite& operator=(const Sprite& rhs);
 
 protected:
-	void drawTransparent(HDC hBackBufferDC) const;
-	void drawMask(HDC hBackBufferDC) const;
+	void drawTransparent(HDC hBackBufferDC, int dx, int dy) const;
+	void drawMask(HDC hBackBufferDC, int dx, int dy) const;
+    void drawBitmap(HDC hBackBufferDC, int dx, int dy) const;
 
 protected:
 	HBITMAP myImage;

@@ -18,6 +18,7 @@
 #include "CGameObject.h"
 #include "BackBuffer.h"
 #include "ResizableImage.h"
+#include "ParallaxLayer.h"
 #include <vector>
 #include <memory>
 
@@ -45,25 +46,25 @@ public:
 	//-------------------------------------------------------------------------
 	// Public Functions for This Class
 	//-------------------------------------------------------------------------
-	LRESULT	DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam );
-	bool		InitInstance( LPCTSTR lpCmdLine, int iCmdShow );
-	int			BeginGame( );
-	bool		ShutDown( );
+	LRESULT     DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam );
+	bool        InitInstance( LPCTSTR lpCmdLine, int iCmdShow );
+	int         BeginGame( );
+	bool        ShutDown( );
 	
 private:
 	//-------------------------------------------------------------------------
 	// Private Functions for This Class
 	//-------------------------------------------------------------------------
-	bool		BuildObjects	( );
-	void		ReleaseObjects( );
-	void		FrameAdvance	( );
-	bool		CreateDisplay	( );
-	void		ChangeDevice	( );
-	void		SetupGameState( );
-	void		AnimateObjects( );
-	void		DrawObjects		( );
-	void		ProcessInput	( );
-	void		CollisionDetection();
+	bool        BuildObjects	( );
+	void        ReleaseObjects( );
+	void        FrameAdvance	( );
+	bool        CreateDisplay	( );
+	void        ChangeDevice	( );
+	void        SetupGameState( );
+	void        AnimateObjects( );
+	void        DrawObjects		( );
+	void        ProcessInput	( );
+	void        CollisionDetection();
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class
@@ -73,28 +74,29 @@ private:
 	//-------------------------------------------------------------------------
 	// Private Variables For This Class
 	//-------------------------------------------------------------------------
-	CTimer			m_Timer;				// Game timer
-	ULONG				m_LastFrameRate;// Used for making sure we update only when fps changes.
+	CTimer              m_Timer;            // Game timer
+	ULONG               m_LastFrameRate;    // Used for making sure we update only when fps changes.
 	
-	HWND				m_hWnd;					// Main window HWND
-	HICON				m_hIcon;				// Window Icon
-	HMENU				m_hMenu;				// Window Menu
+	HWND                m_hWnd;             // Main window HWND
+	HICON               m_hIcon;            // Window Icon
+	HMENU               m_hMenu;            // Window Menu
 	
-	bool				m_bActive;			// Is the application active ?
+	bool                m_bActive;          // Is the application active ?
 
-	ULONG				m_nViewX;				// X Position of render viewport
-	ULONG				m_nViewY;				// Y Position of render viewport
-	ULONG				m_nViewWidth;		// Width of render viewport
-	ULONG				m_nViewHeight;	// Height of render viewport
+	ULONG               m_nViewX;           // X Position of render viewport
+	ULONG               m_nViewY;           // Y Position of render viewport
+	ULONG               m_nViewWidth;       // Width of render viewport
+	ULONG               m_nViewHeight;      // Height of render viewport
 
-	POINT				m_OldCursorPos;	// Old cursor position for tracking
-	HINSTANCE		m_hInstance;		// Window instance
+	POINT               m_OldCursorPos;     // Old cursor position for tracking
+	HINSTANCE		    m_hInstance;		// Window instance
 
-	CResizableImage		m_imgBackground;
-	BackBuffer*				m_pBBuffer;
+	CResizableImage     m_imgBackground;
+	BackBuffer*         m_pBBuffer;
+    ParallaxLayer*      m_pParallax;
 
-	std::vector<std::shared_ptr<CGameObject>>	m_vGameObjects; // Vector with all game objects
-	std::weak_ptr<CPlayer> 										m_pPlayer;			// a weak pointer to player
+	std::vector<std::shared_ptr<CGameObject>>   m_vGameObjects; // Vector with all game objects
+	std::weak_ptr<CPlayer>                      m_pPlayer;      // a weak pointer to player
 };
 
 #endif // _CGAMEAPP_H_

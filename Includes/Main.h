@@ -37,5 +37,12 @@
 #define RAD2DEG(rad) ((rad) * 180.0 / PI)
 
 
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(p)          { if (p) { delete (p);     (p)=NULL; } }
+#endif
+
+#ifndef SAFE_DELETE_ARRAY
+#define SAFE_DELETE_ARRAY(p)    { if (p) { delete[] (p);   (p)=NULL; } }
+#endif
 
 #endif // _MAIN_H_

@@ -57,6 +57,12 @@
     <ClCompile Include="Source\CGameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\ParallaxLayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\TileableSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Includes\BackBuffer.h">
@@ -99,6 +105,12 @@
       <Filter>Resize</Filter>
     </ClInclude>
     <ClInclude Include="Includes\CGameObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\TileableSprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Includes\ParallaxLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

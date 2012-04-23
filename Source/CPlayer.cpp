@@ -23,15 +23,7 @@ CPlayer::CPlayer()
 	m_eSpeedState = SPEED_STOP;
 	m_fTimer = 0;
 
-	// Animation frame crop rectangle
-	RECT r;
-	r.left = 0;
-	r.top = 0;
-	r.right = 128;
-	r.bottom = 128;
-
 	m_pExplosionSprite	= new AnimatedSprite("data/explosion.bmp", "data/explosionmask.bmp");
-	m_pExplosionSprite->Initialize(r, 16, 1 / 16.f);
 	m_bExplosion		= false;
 }
 
@@ -47,9 +39,16 @@ CPlayer::~CPlayer()
 
 void CPlayer::Init(HDC hdc, const Vec2& position)
 {
-	m_pSprite->Setup(hdc);
-	m_pExplosionSprite->Setup(hdc);
-	myPosition = position;
+	m_pSprite->Initialize(hdc);
+    myPosition = position;
+
+    // Animation frame crop rectangle
+    RECT r;
+    r.left = 0;
+    r.top = 0;
+    r.right = 128;
+    r.bottom = 128;
+	m_pExplosionSprite->Initialize(hdc, r, 16, 1 / 16.f);
 }
 
 void CPlayer::Update(float dt)
