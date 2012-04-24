@@ -18,6 +18,7 @@ extern HINSTANCE g_hInst;
 
 #define PLAYER_START_X 100
 #define PLAYER_START_Y 400
+#define PARALLAX_BACKGROUND_SPEED 64
 
 //-----------------------------------------------------------------------------
 // CGameApp Member Functions
@@ -302,8 +303,8 @@ void CGameApp::SetupGameState()
 {
 	m_pPlayer.lock()->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
     
-    m_pParallax->Initialize(m_pBBuffer->getDC(), ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, 30, m_nViewWidth, m_nViewHeight);
     m_pParallax->myPosition = Vec2(m_pParallax->GetWidth()/2, m_pParallax->GetHeight()/2);
+    m_pParallax->Initialize(m_pBBuffer->getDC(), ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
 }
 
 //-----------------------------------------------------------------------------
@@ -379,7 +380,6 @@ void CGameApp::ProcessInput( )
 	
 	// Move the player
 	m_pPlayer.lock()->Move(Direction);
-
 
 	// Now process the mouse (if the button is pressed)
 	if ( GetCapture() == m_hWnd )
