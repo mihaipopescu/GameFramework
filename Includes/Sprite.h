@@ -27,8 +27,11 @@ public:
 	virtual void Draw(HDC hBackBufferDC) const;
     void DrawWithOffset(HDC hBackBufferDC, int dx, int dy) const;
 
-	virtual int GetWidth() const { return myFrameWidth; }
-	virtual int GetHeight() const { return myFrameHeight; }
+	virtual int GetWidth() const { return myBitmap.bmWidth; }
+	virtual int GetHeight() const { return myBitmap.bmHeight; }
+
+    virtual int GetFrameCropX() const { return 0; }
+    virtual int GetFrameCropY() const { return 0; }
 
 private:
 	// Make copy constructor and assignment operator private
@@ -38,23 +41,18 @@ private:
 	Sprite(const Sprite& rhs);
 	Sprite& operator=(const Sprite& rhs);
 
-protected:
+private:
 	void drawTransparent(HDC hBackBufferDC, int dx, int dy) const;
 	void drawMask(HDC hBackBufferDC, int dx, int dy) const;
     void drawBitmap(HDC hBackBufferDC, int dx, int dy) const;
 
-protected:
+private:
 	HBITMAP myImage;
 	HBITMAP myImageMask;
 	BITMAP myBitmap;
 	BITMAP myBitmapMask;
 	COLORREF myTransparentColor;
 	HDC mySpriteDC;
-
-	int myFrameCropX;
-	int myFrameCropY;
-	int myFrameWidth;
-	int myFrameHeight;
 };
 
 #endif // SPRITE_H

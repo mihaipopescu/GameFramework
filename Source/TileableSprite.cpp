@@ -15,7 +15,7 @@ void TileableSprite::Draw(HDC hBackBufferDC) const
 	{
         for(int x=0;x<myXTileCount;++x)
 	    {
-		    Sprite::DrawWithOffset(hBackBufferDC, x*myFrameWidth, y*myFrameHeight);
+		    Sprite::DrawWithOffset(hBackBufferDC, x*GetWidth(), y*GetHeight());
 	    }
     }
 }

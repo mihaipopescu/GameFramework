@@ -7,15 +7,17 @@ void AnimatedSprite::Initialize(HDC hdc, const RECT& rcFirstFrame, int iFrameCou
 
 	myFrameStartCrop.x = rcFirstFrame.left;
 	myFrameStartCrop.y = rcFirstFrame.top;
-	Sprite::myFrameWidth = rcFirstFrame.right - rcFirstFrame.left;
-	Sprite::myFrameHeight = rcFirstFrame.bottom - rcFirstFrame.top;
+
+	myFrameWidth = rcFirstFrame.right - rcFirstFrame.left;
+	myFrameHeight = rcFirstFrame.bottom - rcFirstFrame.top;
 
 	myFrameCount = iFrameCount;
 	myFrameDuration = fFrameDuration;
 	myFrameTimer = 0.f;
-	myFrameIndex = 0;
+	myFrameIndex = myFrameCount;
 
 	myInitializedState = true;
+    myLoopingState = false;
 }
 
 void AnimatedSprite::Update( float dt )
@@ -28,12 +30,17 @@ void AnimatedSprite::Update( float dt )
 	if( myFrameIndex != myFrameCount )
 	{
 		myFrameTimer += dt;
-		if( myFrameIndex == 0 || myFrameTimer >= myFrameDuration )
+		if( myFrameTimer >= myFrameDuration )
 		{
-			Sprite::myFrameCropX = myFrameStartCrop.x + myFrameIndex % (GetWidth() / Sprite::myFrameWidth) * Sprite::myFrameWidth;
-			Sprite::myFrameCropY = myFrameStartCrop.y + myFrameIndex / (GetHeight() / Sprite::myFrameHeight) * Sprite::myFrameHeight;
+			myFrameCropX = myFrameStartCrop.x + (myFrameIndex % (Sprite::GetWidth() / myFrameWidth)) * myFrameWidth;
+			myFrameCropY = myFrameStartCrop.y + (myFrameIndex / (Sprite::GetHeight() / myFrameHeight)) * myFrameHeight;
+
 			myFrameTimer = 0.f;
 			myFrameIndex++;
+
+            // loop when finished
+            if( myLoopingState && myFrameIndex == myFrameCount )
+                myFrameIndex = 0;
 		}
 	}
 }
