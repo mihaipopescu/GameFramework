@@ -21,17 +21,17 @@ public:
 	//! Returns the current frame count
 	int GetFrameCount() { return myFrameCount; }
 	//! Starts playing the animated sprite
-	void Play(bool bLoop = false) { myFrameIndex = 0; myLoopingState = bLoop; }
+	void Play(bool bLoop = false) { myPlayState = true; myLoopingState = bLoop; }
     //! Stops playing the animated sprite
-    void Stop() { myFrameIndex = myFrameCount; }
-	//! Returns the finished state of the animation
-	bool IsFinished() const { return myFrameIndex == myFrameCount; }
+    void Stop() { myPlayState = false; }
+	//! Returns true if the animation is playing
+	bool IsPlaying() const { return myPlayState; }
 
     //! Overrides
     virtual int GetWidth() const { return myFrameWidth; }
     virtual int GetHeight() const { return myFrameHeight; }
-    virtual int GetFrameCropX() const { return myFrameCropX; }
-    virtual int GetFrameCropY() const { return myFrameCropY; }
+    virtual int GetFrameCropX() const { return (int)myFrameCrop.x; }
+    virtual int GetFrameCropY() const { return (int)myFrameCrop.y; }
 
 public:
 	//! Handle switching to the next frame.
@@ -40,13 +40,13 @@ public:
 private:
 	bool myInitializedState;    //!< tells if the class is initialized
     bool myLoopingState;        //!< looping state
+    bool myPlayState;           //!< if the frame is playing
 	float myFrameDuration;      //!< how much a frame 
 	float myFrameTimer;         //!< time accumulator
 	POINT myFrameStartCrop;		//!< first point of the frame (upper-left corner)
 	int myFrameCount;           //!< number of frames
 	int myFrameIndex;           //!< current frame number
-    int myFrameCropX;           //!< crop x
-    int myFrameCropY;           //!< crop y
+    POINT myFrameCrop;          //!< current frame crop
     int myFrameWidth;           //!< frame width
     int myFrameHeight;          //!< frame height
 };

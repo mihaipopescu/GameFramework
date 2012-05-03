@@ -21,6 +21,7 @@ public:
     void Initialize(HDC hdc, int cxTiles, int cyTiles);
 
 	virtual void Draw(HDC hBackBufferDC) const;
+    virtual bool AffectedByGravity() const { return false; }
 
 private:
     int myXTileCount;

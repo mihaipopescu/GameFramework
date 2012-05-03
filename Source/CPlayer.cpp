@@ -71,7 +71,7 @@ void CPlayer::Update(float dt)
 	m_fTimer += dt;
 
 	// handle plane explosion
-	if(m_bExplosion && m_pExplosionSprite->IsFinished())
+	if(m_bExplosion && !m_pExplosionSprite->IsPlaying())
 	{
 		m_bExplosion = false;
 		myVelocity = Vec2(0,0);
