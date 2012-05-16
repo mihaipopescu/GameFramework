@@ -7,6 +7,7 @@
 //-----------------------------------------------------------------------------
 
 #include "Sprite.h"
+#include "CGameApp.h"
 
 
 extern HINSTANCE g_hInst;
@@ -27,8 +28,11 @@ Sprite::Sprite(int imageID, int maskID)
 	assert(myBitmap.bmWidth == myBitmapMask.bmWidth);
 	assert(myBitmap.bmHeight == myBitmapMask.bmHeight);	
 
-	myTransparentColor = 0;
-	mySpriteDC = 0;
+    myTransparentColor = 0;
+    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
+	mySpriteDC = CreateCompatibleDC(myBackBufferDC);
+
+    drawInternal = &Sprite::drawMask;
 }
 
 Sprite::Sprite(const char *szImageFile)
@@ -36,11 +40,14 @@ Sprite::Sprite(const char *szImageFile)
     myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 
     myImageMask = 0;
-    mySpriteDC = 0;
+    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
+    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
     myTransparentColor = INVALID_TRANSPARENT_COLOR;
 
     // Get the BITMAP structure for the bitmap.
     GetObject(myImage, sizeof(BITMAP), &myBitmap);
+
+    drawInternal = &Sprite::drawBitmap;
 }
 
 Sprite::Sprite(const char *szImageFile, const char *szMaskFile)
@@ -57,7 +64,10 @@ Sprite::Sprite(const char *szImageFile, const char *szMaskFile)
 	assert(myBitmap.bmHeight == myBitmapMask.bmHeight);
 
 	myTransparentColor = INVALID_TRANSPARENT_COLOR;
-	mySpriteDC = 0;
+    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
+    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
+
+    drawInternal = &Sprite::drawMask;
 }
 
 Sprite::Sprite(const char *szImageFile, COLORREF crTransparentColor)
@@ -65,11 +75,14 @@ Sprite::Sprite(const char *szImageFile, COLORREF crTransparentColor)
 	myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 
 	myImageMask = 0;
-	mySpriteDC = 0;
+    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
+    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
 	myTransparentColor = crTransparentColor;
 
 	// Get the BITMAP structure for the bitmap.
 	GetObject(myImage, sizeof(BITMAP), &myBitmap);
+
+    drawInternal = &Sprite::drawTransparent;
 }
 
 Sprite::~Sprite()
@@ -81,30 +94,17 @@ Sprite::~Sprite()
 	DeleteDC(mySpriteDC);
 }
 
-void Sprite::Initialize(HDC hBackBufferDC)
+void Sprite::Draw() const
 {
-	if( mySpriteDC == 0 )
-	{
-		mySpriteDC = CreateCompatibleDC(hBackBufferDC);
-	}
+	DrawWithOffset(0, 0);
 }
 
-void Sprite::Draw(HDC hBackBufferDC) const
+void Sprite::DrawWithOffset(int dx, int dy) const
 {
-	DrawWithOffset(hBackBufferDC, 0, 0);
+    (this->*drawInternal)(dx, dy);
 }
 
-void Sprite::DrawWithOffset(HDC hBackBufferDC, int dx, int dy) const
-{
-    if( myImageMask != 0 )
-        drawMask(hBackBufferDC, dx, dy);
-    else if ( myTransparentColor != INVALID_TRANSPARENT_COLOR )
-        drawTransparent(hBackBufferDC, dx, dy);
-    else
-        drawBitmap(hBackBufferDC, dx, dy);
-}
-
-void Sprite::drawMask(HDC hBackBufferDC, int dx, int dy) const
+void Sprite::drawMask(int dx, int dy) const
 {
 	// The position BitBlt wants is not the sprite's center
 	// position; rather, it wants the upper-left position,
@@ -127,7 +127,7 @@ void Sprite::drawMask(HDC hBackBufferDC, int dx, int dy) const
 	// only draws the black pixels in the mask to the backbuffer,
 	// thereby marking the pixels we want to draw the sprite
 	// image onto.
-	BitBlt(hBackBufferDC, x+dx, y+dx, w, h, mySpriteDC, cx, cy, SRCAND);
+	BitBlt(myBackBufferDC, x+dx, y+dx, w, h, mySpriteDC, cx, cy, SRCAND);
 
 	// Now select the image bitmap.
 	SelectObject(mySpriteDC, myImage);
@@ -135,13 +135,13 @@ void Sprite::drawMask(HDC hBackBufferDC, int dx, int dy) const
 	// Draw the image to the backbuffer with SRCPAINT. This
 	// will only draw the image onto the pixels that where previously
 	// marked black by the mask.
-	BitBlt(hBackBufferDC, x+dx, y+dx, w, h, mySpriteDC, cx, cy, SRCPAINT);
+	BitBlt(myBackBufferDC, x+dx, y+dx, w, h, mySpriteDC, cx, cy, SRCPAINT);
 
 	// Restore the original bitmap object.
 	SelectObject(mySpriteDC, oldObj);
 }
 
-void Sprite::drawTransparent(HDC hBackBufferDC, int dx, int dy) const
+void Sprite::drawTransparent(int dx, int dy) const
 {
 	// Upper-left corner.
     int w = GetWidth();
@@ -152,13 +152,13 @@ void Sprite::drawTransparent(HDC hBackBufferDC, int dx, int dy) const
     int x = (int)myPosition.x - (w / 2);
     int y = (int)myPosition.y - (h / 2);
 
-	COLORREF crOldBack = SetBkColor(hBackBufferDC, RGB(255, 255, 255));
-	COLORREF crOldText = SetTextColor(hBackBufferDC, RGB(0, 0, 0));
+	COLORREF crOldBack = SetBkColor(myBackBufferDC, RGB(255, 255, 255));
+	COLORREF crOldText = SetTextColor(myBackBufferDC, RGB(0, 0, 0));
 	HDC dcImage, dcTrans;
 
 	// Create two memory dcs for the image and the mask
-	dcImage=CreateCompatibleDC(hBackBufferDC);
-	dcTrans=CreateCompatibleDC(hBackBufferDC);
+	dcImage=CreateCompatibleDC(myBackBufferDC);
+	dcTrans=CreateCompatibleDC(myBackBufferDC);
 
 	// Select the image into the appropriate dc
 	SelectObject(dcImage, myImage);
@@ -176,9 +176,9 @@ void Sprite::drawTransparent(HDC hBackBufferDC, int dx, int dy) const
 	BitBlt(dcTrans, 0, 0, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCCOPY);
 
 	// Do the work - True Mask method - cool if not actual display
-	BitBlt(hBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
-	BitBlt(hBackBufferDC, x+dx, y+dy, w, h, dcTrans, cx, cy, SRCAND);
-	BitBlt(hBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcTrans, cx, cy, SRCAND);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
 
 	// free memory	
 	DeleteDC(dcImage);
@@ -186,11 +186,11 @@ void Sprite::drawTransparent(HDC hBackBufferDC, int dx, int dy) const
 	DeleteObject(bitmapTrans);
 
 	// Restore settings
-	SetBkColor(hBackBufferDC, crOldBack);
-	SetTextColor(hBackBufferDC, crOldText);
+	SetBkColor(myBackBufferDC, crOldBack);
+	SetTextColor(myBackBufferDC, crOldText);
 }
 
-void Sprite::drawBitmap(HDC hBackBufferDC, int dx, int dy) const
+void Sprite::drawBitmap(int dx, int dy) const
 {
     int w = GetWidth();
     int h = GetHeight();
@@ -203,7 +203,7 @@ void Sprite::drawBitmap(HDC hBackBufferDC, int dx, int dy) const
     HGDIOBJ oldObj = SelectObject(mySpriteDC, myImage);
 
     // Draw the image to the backbuffer with SRCCOPY
-    BitBlt(hBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCCOPY);
+    BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCCOPY);
 
     // Restore the original bitmap object.
     SelectObject(mySpriteDC, oldObj);

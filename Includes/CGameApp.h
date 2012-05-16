@@ -19,6 +19,7 @@
 #include "BackBuffer.h"
 #include "ResizableImage.h"
 #include "ParallaxLayer.h"
+#include "Singleton.h"
 #include <vector>
 #include <memory>
 
@@ -34,13 +35,13 @@
 // Name : CGameApp (Class)
 // Desc : Central game engine, initializes the game and handles core processes.
 //-----------------------------------------------------------------------------
-class CGameApp
+class CGameApp : public Singleton<CGameApp>
 {
+    SINGLETON_DECL(CGameApp);
 public:
 	//-------------------------------------------------------------------------
 	// Constructors & Destructors for This Class.
 	//-------------------------------------------------------------------------
-	CGameApp();
 	virtual ~CGameApp();
 
 	//-------------------------------------------------------------------------
@@ -50,6 +51,7 @@ public:
 	bool        InitInstance( LPCTSTR lpCmdLine, int iCmdShow );
 	int         BeginGame( );
 	bool        ShutDown( );
+    HDC         GetBackBufferDC() const { return m_pBBuffer ? m_pBBuffer->getDC() : NULL; }
 	
 private:
 	//-------------------------------------------------------------------------

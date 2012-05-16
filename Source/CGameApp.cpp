@@ -13,6 +13,7 @@
 #include "CPlayer.h"
 #include <algorithm>
 
+SINGLETON_IMPL(CGameApp);
 
 extern HINSTANCE g_hInst;
 
@@ -301,10 +302,10 @@ bool CGameApp::BuildObjects()
 //-----------------------------------------------------------------------------
 void CGameApp::SetupGameState()
 {
-	m_pPlayer.lock()->Init(m_pBBuffer->getDC(), Vec2(PLAYER_START_X, PLAYER_START_Y));
+	m_pPlayer.lock()->Init(Vec2(PLAYER_START_X, PLAYER_START_Y));
     
     m_pParallax->myPosition = Vec2(m_pParallax->GetWidth()/2, m_pParallax->GetHeight()/2);
-    m_pParallax->Initialize(m_pBBuffer->getDC(), ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
+    m_pParallax->Initialize(ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
 }
 
 //-----------------------------------------------------------------------------
@@ -426,12 +427,11 @@ void CGameApp::DrawObjects()
 
     m_imgBackground.Paint(hdc, 0, 0);
 
-    m_pParallax->Draw(hdc);
+    m_pParallax->Draw();
 
-	DrawFunctor drawFn(hdc);
+	DrawFunctor drawFn;
 	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), drawFn);
 
-    
 	m_pBBuffer->present();
 }
 

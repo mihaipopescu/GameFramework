@@ -1,4 +1,5 @@
 #include "CGameObject.h"
+#include "CGameApp.h"
 
 CGameObject::CGameObject() 
     : myCollisionSide(CS_None)
@@ -48,8 +49,9 @@ void CGameObject::Update(float dt)
 	myVelocity += a * dt;
 }
 
-void CGameObject::Draw(HDC hdc) const
+void CGameObject::Draw() const
 { 
+    HDC hdc = CGameApp::Get()->GetBackBufferDC();
     HGDIOBJ old_obj = SelectObject(hdc, mySpeedPen);
 
     MoveToEx(hdc, myPosition.x, myPosition.y, NULL);

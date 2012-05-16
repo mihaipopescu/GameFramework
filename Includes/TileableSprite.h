@@ -18,9 +18,9 @@ public:
     TileableSprite(const char *szImageFile, const char *szMaskFile) : Sprite(szImageFile, szMaskFile) { }
     TileableSprite(const char *szImageFile, COLORREF crTransparentColor) : Sprite(szImageFile, crTransparentColor) { }
 
-    void Initialize(HDC hdc, int cxTiles, int cyTiles);
+    void Initialize(int cxTiles, int cyTiles);
 
-	virtual void Draw(HDC hBackBufferDC) const;
+	virtual void Draw() const;
 
 private:
     int myXTileCount;

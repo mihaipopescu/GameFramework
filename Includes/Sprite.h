@@ -22,10 +22,8 @@ public:
 	Sprite(const char *szImageFile, COLORREF crTransparentColor);
 	virtual ~Sprite();
 
-	void Initialize(HDC hdc);
-
-	virtual void Draw(HDC hBackBufferDC) const;
-    void DrawWithOffset(HDC hBackBufferDC, int dx, int dy) const;
+	virtual void Draw() const;
+    void DrawWithOffset(int dx, int dy) const;
 
 	virtual int GetWidth() const { return myBitmap.bmWidth; }
 	virtual int GetHeight() const { return myBitmap.bmHeight; }
@@ -42,11 +40,14 @@ private:
 	Sprite& operator=(const Sprite& rhs);
 
 private:
-	void drawTransparent(HDC hBackBufferDC, int dx, int dy) const;
-	void drawMask(HDC hBackBufferDC, int dx, int dy) const;
-    void drawBitmap(HDC hBackBufferDC, int dx, int dy) const;
+	void drawTransparent(int dx, int dy) const;
+	void drawMask(int dx, int dy) const;
+    void drawBitmap(int dx, int dy) const;
 
 private:
+    void (Sprite::*drawInternal)(int dx, int dy) const;
+
+    HDC myBackBufferDC;
 	HBITMAP myImage;
 	HBITMAP myImageMask;
 	BITMAP myBitmap;

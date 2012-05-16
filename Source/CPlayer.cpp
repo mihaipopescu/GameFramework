@@ -37,9 +37,8 @@ CPlayer::~CPlayer()
 	delete m_pExplosionSprite;
 }
 
-void CPlayer::Init(HDC hdc, const Vec2& position)
+void CPlayer::Init(const Vec2& position)
 {
-	m_pSprite->Initialize(hdc);
     myPosition = position;
 
     // Animation frame crop rectangle
@@ -48,7 +47,7 @@ void CPlayer::Init(HDC hdc, const Vec2& position)
     r.top = 0;
     r.right = 128;
     r.bottom = 128;
-	m_pExplosionSprite->Initialize(hdc, r, 16, 1 / 16.f);
+	m_pExplosionSprite->Initialize(r, 16, 1 / 16.f);
 }
 
 void CPlayer::Update(float dt)
@@ -111,14 +110,14 @@ void CPlayer::Update(float dt)
 	// http://www.codeproject.com/KB/audio-video/midiwrapper.aspx (with code also)
 }
 
-void CPlayer::Draw(HDC hdc) const
+void CPlayer::Draw() const
 {
     if(!m_bExplosion)
-		m_pSprite->Draw(hdc);
+		m_pSprite->Draw();
 	else
-		m_pExplosionSprite->Draw(hdc);
+		m_pExplosionSprite->Draw();
 
-    CGameObject::Draw(hdc);
+    CGameObject::Draw();
 }
 
 void CPlayer::Move(ULONG ulDirection)

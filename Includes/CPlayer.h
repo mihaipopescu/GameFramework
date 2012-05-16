@@ -32,10 +32,10 @@ public:
 	//-------------------------------------------------------------------------
 	enum DIRECTION 
 	{ 
-		DIR_FORWARD		= 1, 
-		DIR_BACKWARD	= 2, 
-		DIR_LEFT			= 4, 
-		DIR_RIGHT			= 8, 
+		DIR_FORWARD     = 1, 
+		DIR_BACKWARD    = 2, 
+		DIR_LEFT        = 4, 
+		DIR_RIGHT       = 8, 
 	};
 
 	enum ESpeedStates
@@ -53,24 +53,24 @@ public:
 	//-------------------------------------------------------------------------
 	// Public Functions for This Class.
 	//-------------------------------------------------------------------------
-	void						Init(HDC hdc, const Vec2& position);
-	void						Update( float dt );
-	GameObjectType	GetObjectType() const { return GOT_Player; }
-	void						Draw(HDC hdc) const;
-	void						Move(ULONG ulDirection);
-	virtual int			GetWidth() const { return m_pSprite->GetWidth(); }
-	virtual int			GetHeight() const { return m_pSprite->GetHeight(); }
-	void						Explode();
+	void            Init(const Vec2& position);
+	void            Update( float dt );
+	GameObjectType  GetObjectType() const { return GOT_Player; }
+	void            Draw() const;
+	void            Move(ULONG ulDirection);
+	virtual int	    GetWidth() const { return m_pSprite->GetWidth(); }
+	virtual int     GetHeight() const { return m_pSprite->GetHeight(); }
+	void            Explode();
 
 private:
 	//-------------------------------------------------------------------------
 	// Private Variables for This Class.
 	//-------------------------------------------------------------------------
-	Sprite*					m_pSprite;
-	ESpeedStates		m_eSpeedState;
-	float						m_fTimer;
+	Sprite*         m_pSprite;
+	ESpeedStates    m_eSpeedState;
+	float           m_fTimer;
 	
-	bool						m_bExplosion;
+	bool            m_bExplosion;
 	AnimatedSprite*	m_pExplosionSprite;
 };
 

@@ -15,7 +15,6 @@
 //-----------------------------------------------------------------------------
 // Global Variable Definitions
 //-----------------------------------------------------------------------------
-CGameApp	g_App;	  // Core game application processing engine
 HINSTANCE	g_hInst;	// Global instance
 
 //-----------------------------------------------------------------------------
@@ -34,14 +33,20 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLi
 	// initialize global instance
 	g_hInst = hInstance;
 
-	// Initialise the engine.
-	if (!g_App.InitInstance( lpCmdLine, iCmdShow )) return 1;
+    // create core game application processing engine
+    CGameApp::Create();
+
+	// Initialize the engine.
+	if (!CGameApp::Get()->InitInstance( lpCmdLine, iCmdShow )) return 1;
 	
 	// Begin the gameplay process. Will return when app due to exit.
-	retCode = g_App.BeginGame();
+	retCode = CGameApp::Get()->BeginGame();
 
 	// Shut down the engine, just to be polite, before exiting.
-	if ( !g_App.ShutDown() )  MessageBox( 0, _T("Failed to shut system down correctly, please check file named 'debug.txt'.\r\n\r\nIf the problem persists, please contact technical support."), _T("Non-Fatal Error"), MB_OK | MB_ICONEXCLAMATION );
+	if ( !CGameApp::Get()->ShutDown() )  MessageBox( 0, _T("Failed to shut system down correctly, please check file named 'debug.txt'.\r\n\r\nIf the problem persists, please contact technical support."), _T("Non-Fatal Error"), MB_OK | MB_ICONEXCLAMATION );
+
+    // Destroy the game instance
+    CGameApp::Destroy();
 
 	// Return the correct exit code.
 	return retCode;

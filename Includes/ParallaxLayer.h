@@ -35,7 +35,7 @@ public:
 	/*-------------------------------------------------------------------------
 	 Public Functions for This Class.
 	-------------------------------------------------------------------------*/
-    void        Initialize(HDC hdc, ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth, ULONG ulViewHeight);
+    void        Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth, ULONG ulViewHeight);
 	void        Update(float dt);
 	void        Move(ULONG ulDirection);
 

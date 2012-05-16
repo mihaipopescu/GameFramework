@@ -113,6 +113,9 @@
     <ClInclude Include="Includes\ParallaxLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Includes\Singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Res\directx.ico">

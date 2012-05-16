@@ -188,6 +188,7 @@
     <ClInclude Include="Includes\ImageFile.h" />
     <ClInclude Include="Includes\Main.h" />
     <ClInclude Include="Includes\ResizableImage.h" />
+    <ClInclude Include="Includes\Singleton.h" />
     <ClInclude Include="Includes\TileableSprite.h" />
     <ClInclude Include="Includes\WeightsTable.h" />
     <ClInclude Include="Includes\Sprite.h" />

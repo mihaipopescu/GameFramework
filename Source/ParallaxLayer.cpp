@@ -10,7 +10,7 @@ ParallaxLayer::~ParallaxLayer()
 {
 }
 
-void ParallaxLayer::Initialize(HDC hdc, ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth, ULONG ulViewHeight)
+void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth, ULONG ulViewHeight)
 {
     int w = GetWidth();
     int h = GetHeight();
@@ -28,7 +28,7 @@ void ParallaxLayer::Initialize(HDC hdc, ULONG ulAxis, int iLayerSpeed, ULONG ulV
         cy++;
     }
 
-    TileableSprite::Initialize(hdc, ulAxis & AXIS_HORIZONTAL ? cx : 1, ulAxis & AXIS_VERTICAL ? cy : 1);
+    TileableSprite::Initialize(ulAxis & AXIS_HORIZONTAL ? cx : 1, ulAxis & AXIS_VERTICAL ? cy : 1);
 
     Vec2 vInsertPos = TileableSprite::myPosition;
 

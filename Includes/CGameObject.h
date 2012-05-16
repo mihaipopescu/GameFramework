@@ -37,7 +37,7 @@ public:
 
 	virtual GameObjectType GetObjectType() const { return GOT_Invalid; }
 	virtual void Update(float dt);
-	virtual void Draw(HDC hdc) const = 0;
+	virtual void Draw() const = 0;
 	virtual bool Expired() const { return false; }
 	virtual int GetWidth() const = 0;
 	virtual int GetHeight() const = 0;
@@ -82,13 +82,11 @@ protected:
 class DrawFunctor
 {
 public:
-	DrawFunctor(HDC hdc) : myHDC(hdc) { }
+	DrawFunctor() { }
 	void operator()(const std::shared_ptr<CGameObject>& object)
 	{
-		object->Draw(myHDC);
+		object->Draw();
 	}
-protected:
-	HDC myHDC;
 };
 
 #endif // GAME_OBJECT_H
