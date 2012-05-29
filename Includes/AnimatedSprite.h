@@ -12,6 +12,7 @@
 class AnimatedSprite : public Sprite
 {
 public:
+    AnimatedSprite(const char *szImageFile) : Sprite(szImageFile) { myInitializedState = false; }
 	AnimatedSprite(const char *szImageFile, const char *szMaskFile) : Sprite(szImageFile, szMaskFile) { myInitializedState = false; }
 	AnimatedSprite(const char *szImageFile, COLORREF crTransparentColor) : Sprite(szImageFile, crTransparentColor) { myInitializedState = false; }
 
@@ -26,6 +27,8 @@ public:
     void Stop() { myPlayState = false; }
 	//! Returns true if the animation is playing
 	bool IsPlaying() const { return myPlayState; }
+    //! Sets the current frame index
+    inline void SetFrameIndex(int iFrameIndex);
 
     //! Overrides
     virtual int GetWidth() const { return myFrameWidth; }

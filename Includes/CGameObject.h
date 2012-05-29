@@ -29,24 +29,33 @@ enum CollisionSide
     CS_Bottom = 8
 };
 
-class CGameObject
+class IDrawable
+{
+public:
+    virtual void Draw() const = 0;
+    virtual int GetWidth() const = 0;
+    virtual int GetHeight() const = 0;
+
+public:
+    Vec2 myPosition;
+};
+
+class CGameObject : public IDrawable
 {
 public:
     CGameObject();
     virtual ~CGameObject();
 
 	virtual GameObjectType GetObjectType() const { return GOT_Invalid; }
+
+    virtual void Draw() const;
 	virtual void Update(float dt);
-	virtual void Draw() const = 0;
 	virtual bool Expired() const { return false; }
-	virtual int GetWidth() const = 0;
-	virtual int GetHeight() const = 0;
 	virtual bool AffectedByGravity() const { return true; }
 
 public:
 	// Keep these public because they need to be
 	// modified externally frequently.
-	Vec2 myPosition;
 	Vec2 myVelocity;
 	Vec2 myAcceleration;
     int myCollisionSide;

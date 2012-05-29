@@ -16,6 +16,7 @@
 #include "Main.h"
 #include "Sprite.h"
 #include "AnimatedSprite.h"
+#include "CGameObject.h"
 
 //-----------------------------------------------------------------------------
 // Main Class Definitions

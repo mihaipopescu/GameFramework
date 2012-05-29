@@ -21,10 +21,15 @@ void AnimatedSprite::Initialize(const RECT& rcFirstFrame, int iFrameCount, float
     myPlayState = false;
 }
 
+inline void AnimatedSprite::SetFrameIndex(int iFrameIndex)
+{
+    myFrameIndex = iFrameIndex; 
+    myFrameCrop.x = myFrameStartCrop.x + (myFrameIndex % (Sprite::GetWidth() / myFrameWidth)) * myFrameWidth;
+    myFrameCrop.y = myFrameStartCrop.y + (myFrameIndex / (Sprite::GetHeight() / myFrameHeight)) * myFrameHeight;
+}
+
 void AnimatedSprite::Update( float dt )
 {
-	CGameObject::Update(dt);
-
 	if( !myInitializedState || !myPlayState )
 		return;
 
@@ -33,16 +38,13 @@ void AnimatedSprite::Update( float dt )
 		myFrameTimer += dt;
 		if( myFrameTimer >= myFrameDuration )
 		{
-			myFrameCrop.x = myFrameStartCrop.x + (myFrameIndex % (Sprite::GetWidth() / myFrameWidth)) * myFrameWidth;
-			myFrameCrop.y = myFrameStartCrop.y + (myFrameIndex / (Sprite::GetHeight() / myFrameHeight)) * myFrameHeight;
-
 			myFrameTimer = 0.f;
-			myFrameIndex++;
+            SetFrameIndex(myFrameIndex + 1);
 
             // loop when finished
             if( myFrameIndex == myFrameCount )
             {
-                myFrameIndex = 0;
+                SetFrameIndex(0);
                 if( !myLoopingState  )
                     myPlayState = false;
             }

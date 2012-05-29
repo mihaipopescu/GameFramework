@@ -32,15 +32,15 @@ void CGameObject::Update(float dt)
 
     if( (myCollisionSide & CS_Left) || (myCollisionSide & CS_Right) )
     {
-        myVelocity.x = 0;
-        myCollisionSide = CS_None;
+        myVelocity.x = 0;  
     }
 
     if( (myCollisionSide & CS_Top) || (myCollisionSide & CS_Bottom) )
     {
         myVelocity.y = 0;
-        myCollisionSide = CS_None;
     }
+    
+    myCollisionSide = CS_None;
 
     myResultant = a;
 
@@ -54,12 +54,12 @@ void CGameObject::Draw() const
     HDC hdc = CGameApp::Get()->GetBackBufferDC();
     HGDIOBJ old_obj = SelectObject(hdc, mySpeedPen);
 
-    MoveToEx(hdc, myPosition.x, myPosition.y, NULL);
-    LineTo(hdc, myPosition.x + myVelocity.x, myPosition.y + myVelocity.y);
+    MoveToEx(hdc, (int)myPosition.x, (int)myPosition.y, NULL);
+    LineTo(hdc, (int)(myPosition.x + myVelocity.x), (int)(myPosition.y + myVelocity.y));
  
     SelectObject(hdc, myAccelerationPen);
-    MoveToEx(hdc, myPosition.x, myPosition.y, NULL);
-    LineTo(hdc, myPosition.x + myResultant.x, myPosition.y + myResultant.y);
+    MoveToEx(hdc, (int)myPosition.x, (int)myPosition.y, NULL);
+    LineTo(hdc, (int)(myPosition.x + myResultant.x), (int)(myPosition.y + myResultant.y));
     
     SelectObject(hdc, old_obj);
 }

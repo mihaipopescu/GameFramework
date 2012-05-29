@@ -42,6 +42,7 @@ CTimer::CTimer()
 	m_FrameRate			= 0;
 	m_FPSFrameCount		= 0;
 	m_FPSTimeElapsed	= 0.0f;
+    m_TimeElapsed       = 0.f;
 }
 
 //-----------------------------------------------------------------------------

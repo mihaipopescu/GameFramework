@@ -16,6 +16,8 @@ extern HINSTANCE g_hInst;
 
 Sprite::Sprite(int imageID, int maskID)
 {
+    Init();
+
 	// Load the bitmap resources.
 	myImage = LoadBitmap(g_hInst, MAKEINTRESOURCE(imageID));
 	myImageMask = LoadBitmap(g_hInst, MAKEINTRESOURCE(maskID));
@@ -26,23 +28,16 @@ Sprite::Sprite(int imageID, int maskID)
 
 	// Image and Mask should be the same dimensions.
 	assert(myBitmap.bmWidth == myBitmapMask.bmWidth);
-	assert(myBitmap.bmHeight == myBitmapMask.bmHeight);	
-
-    myTransparentColor = 0;
-    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
-	mySpriteDC = CreateCompatibleDC(myBackBufferDC);
+	assert(myBitmap.bmHeight == myBitmapMask.bmHeight);
 
     drawInternal = &Sprite::drawMask;
 }
 
 Sprite::Sprite(const char *szImageFile)
 {
-    myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    Init();
 
-    myImageMask = 0;
-    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
-    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
-    myTransparentColor = INVALID_TRANSPARENT_COLOR;
+    myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 
     // Get the BITMAP structure for the bitmap.
     GetObject(myImage, sizeof(BITMAP), &myBitmap);
@@ -52,6 +47,8 @@ Sprite::Sprite(const char *szImageFile)
 
 Sprite::Sprite(const char *szImageFile, const char *szMaskFile)
 {
+    Init();
+
 	myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 	myImageMask = (HBITMAP)LoadImage(g_hInst, szMaskFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
 
@@ -63,26 +60,37 @@ Sprite::Sprite(const char *szImageFile, const char *szMaskFile)
 	assert(myBitmap.bmWidth == myBitmapMask.bmWidth);
 	assert(myBitmap.bmHeight == myBitmapMask.bmHeight);
 
-	myTransparentColor = INVALID_TRANSPARENT_COLOR;
-    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
-    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
-
     drawInternal = &Sprite::drawMask;
 }
 
 Sprite::Sprite(const char *szImageFile, COLORREF crTransparentColor)
 {
-	myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    Init();
 
-	myImageMask = 0;
-    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
-    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
+	myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    mySpriteMaskDC = CreateCompatibleDC(myBackBufferDC);
 	myTransparentColor = crTransparentColor;
 
 	// Get the BITMAP structure for the bitmap.
 	GetObject(myImage, sizeof(BITMAP), &myBitmap);
 
+    // create the mask
+    myImageMask = CreateBitmap(myBitmap.bmWidth, myBitmap.bmHeight, 1, 1, NULL);
+
     drawInternal = &Sprite::drawTransparent;
+}
+
+Sprite::Sprite( const char *szImageFile, unsigned char uAlpha )
+{
+    Init();
+
+    myImage = (HBITMAP)LoadImage(g_hInst, szImageFile, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_LOADFROMFILE);
+    myAlpha = uAlpha;
+
+    // Get the BITMAP structure for the bitmap.
+    GetObject(myImage, sizeof(BITMAP), &myBitmap);
+
+    drawInternal = &Sprite::drawAlphaBlend;
 }
 
 Sprite::~Sprite()
@@ -92,6 +100,22 @@ Sprite::~Sprite()
 	DeleteObject(myImageMask);
 
 	DeleteDC(mySpriteDC);
+    DeleteDC(mySpriteMaskDC);
+}
+
+void Sprite::Init()
+{
+    myBackBufferDC = CGameApp::Get()->GetBackBufferDC();
+    myImage = 0;
+    myImageMask = 0;
+    memset(&myBitmap, 0, sizeof(BITMAP));
+    memset(&myBitmapMask, 0, sizeof(BITMAP));
+    mySpriteDC = CreateCompatibleDC(myBackBufferDC);
+    mySpriteMaskDC = 0;
+    myAlpha = -1;
+    myTransparentColor = INVALID_TRANSPARENT_COLOR;
+
+    drawInternal = NULL;
 }
 
 void Sprite::Draw() const
@@ -154,36 +178,21 @@ void Sprite::drawTransparent(int dx, int dy) const
 
 	COLORREF crOldBack = SetBkColor(myBackBufferDC, RGB(255, 255, 255));
 	COLORREF crOldText = SetTextColor(myBackBufferDC, RGB(0, 0, 0));
-	HDC dcImage, dcTrans;
 
-	// Create two memory dcs for the image and the mask
-	dcImage=CreateCompatibleDC(myBackBufferDC);
-	dcTrans=CreateCompatibleDC(myBackBufferDC);
+	// Select the image into the appropriate DC
+	SelectObject(mySpriteDC, myImage);
 
-	// Select the image into the appropriate dc
-	SelectObject(dcImage, myImage);
-
-	// Create the mask bitmap
-	BITMAP bitmap;
-	GetObject(myImage, sizeof(BITMAP), &bitmap);
-	HBITMAP bitmapTrans = CreateBitmap(w, h, 1, 1, NULL);
-
-	// Select the mask bitmap into the appropriate dc
-	SelectObject(dcTrans, bitmapTrans);
+	// Select the mask bitmap into the appropriate DC
+	SelectObject(mySpriteMaskDC, myImageMask);
 
 	// Build mask based on transparent color
-	SetBkColor(dcImage, myTransparentColor);
-	BitBlt(dcTrans, 0, 0, bitmap.bmWidth, bitmap.bmHeight, dcImage, 0, 0, SRCCOPY);
+	SetBkColor(mySpriteDC, myTransparentColor);
+	BitBlt(mySpriteMaskDC, 0, 0, w, h, mySpriteDC, 0, 0, SRCCOPY);
 
 	// Do the work - True Mask method - cool if not actual display
-	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
-	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcTrans, cx, cy, SRCAND);
-	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, dcImage, cx, cy, SRCINVERT);
-
-	// free memory	
-	DeleteDC(dcImage);
-	DeleteDC(dcTrans);
-	DeleteObject(bitmapTrans);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCINVERT);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteMaskDC, cx, cy, SRCAND);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCINVERT);
 
 	// Restore settings
 	SetBkColor(myBackBufferDC, crOldBack);
@@ -206,5 +215,28 @@ void Sprite::drawBitmap(int dx, int dy) const
     BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCCOPY);
 
     // Restore the original bitmap object.
+    SelectObject(mySpriteDC, oldObj);
+}
+
+void Sprite::drawAlphaBlend( int dx, int dy ) const
+{
+    int w = GetWidth();
+    int h = GetHeight();
+    int cx = GetFrameCropX();
+    int cy = GetFrameCropY();
+
+    int x = (int)myPosition.x - (w / 2);
+    int y = (int)myPosition.y - (h / 2);
+
+    HGDIOBJ oldObj = SelectObject(mySpriteDC, myImage);
+
+    BLENDFUNCTION blend;
+    blend.SourceConstantAlpha = myAlpha;
+    blend.BlendFlags = 0;
+    blend.AlphaFormat = 0;
+    blend.BlendOp = AC_SRC_OVER;
+    
+    AlphaBlend(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, w, h, blend);
+
     SelectObject(mySpriteDC, oldObj);
 }

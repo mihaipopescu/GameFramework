@@ -12,48 +12,55 @@
 #include "Vec2.h"
 #include "CGameObject.h"
 
-
-class Sprite : public CGameObject
+class Sprite : public IDrawable
 {
 public:
-	Sprite(int imageID, int maskID);
-	Sprite(const char *szImageFile);
+    Sprite(int imageID, int maskID);
+    Sprite(const char *szImageFile);
     Sprite(const char *szImageFile, const char *szMaskFile);
-	Sprite(const char *szImageFile, COLORREF crTransparentColor);
-	virtual ~Sprite();
+    Sprite(const char *szImageFile, COLORREF crTransparentColor);
+    Sprite(const char *szImageFile, unsigned char uAlpha);
+    virtual ~Sprite();
 
-	virtual void Draw() const;
+    void Init();
+    
+    virtual void Draw() const;
     void DrawWithOffset(int dx, int dy) const;
 
-	virtual int GetWidth() const { return myBitmap.bmWidth; }
-	virtual int GetHeight() const { return myBitmap.bmHeight; }
+    virtual int GetWidth() const { return myBitmap.bmWidth; }
+    virtual int GetHeight() const { return myBitmap.bmHeight; }
 
     virtual int GetFrameCropX() const { return 0; }
     virtual int GetFrameCropY() const { return 0; }
 
-private:
-	// Make copy constructor and assignment operator private
-	// so client cannot copy Sprites. We do this because
-	// this class is not designed to be copied because it
-	// is not efficient--copying bitmaps is slow (lots of memory).
-	Sprite(const Sprite& rhs);
-	Sprite& operator=(const Sprite& rhs);
+    void SetAlpha(unsigned char uAlpha) { myAlpha = uAlpha; }
 
 private:
-	void drawTransparent(int dx, int dy) const;
-	void drawMask(int dx, int dy) const;
+    // Make copy constructor and assignment operator private
+    // so client cannot copy Sprites. We do this because
+    // this class is not designed to be copied because it
+    // is not efficient--copying bitmaps is slow (lots of memory).
+    Sprite(const Sprite& rhs);
+    Sprite& operator=(const Sprite& rhs);
+
+private:
+    void drawTransparent(int dx, int dy) const;
+    void drawMask(int dx, int dy) const;
     void drawBitmap(int dx, int dy) const;
+    void drawAlphaBlend(int dx, int dy) const;
 
 private:
+    HDC myBackBufferDC;	
+    HBITMAP myImage;
+    HBITMAP myImageMask;
+    BITMAP myBitmap;
+    BITMAP myBitmapMask;
+    HDC mySpriteDC;
+    HDC mySpriteMaskDC;
+    unsigned char myAlpha;
+    COLORREF myTransparentColor;
+    
     void (Sprite::*drawInternal)(int dx, int dy) const;
-
-    HDC myBackBufferDC;
-	HBITMAP myImage;
-	HBITMAP myImageMask;
-	BITMAP myBitmap;
-	BITMAP myBitmapMask;
-	COLORREF myTransparentColor;
-	HDC mySpriteDC;
 };
 
 #endif // SPRITE_H

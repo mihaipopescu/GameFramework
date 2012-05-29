@@ -341,7 +341,7 @@ void CGameApp::FrameAdvance()
 	if ( m_LastFrameRate != m_Timer.GetFrameRate() )
 	{
 		m_LastFrameRate = m_Timer.GetFrameRate( FrameRate, 50 );
-		sprintf_s( TitleBuffer, _T("Game : %s"), FrameRate );
+		sprintf_s( TitleBuffer, _T("GameFramework @ %s"), FrameRate );
 		SetWindowText( m_hWnd, TitleBuffer );
 	} // End if Frame Rate Altered
 
@@ -426,7 +426,6 @@ void CGameApp::DrawObjects()
 	HDC hdc = m_pBBuffer->getDC();
 
     m_imgBackground.Paint(hdc, 0, 0);
-
     m_pParallax->Draw();
 
 	DrawFunctor drawFn;

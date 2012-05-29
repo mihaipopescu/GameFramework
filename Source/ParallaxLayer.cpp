@@ -2,12 +2,13 @@
 
 
 ParallaxLayer::ParallaxLayer(const char *szImageFile)
-    : TileableSprite(szImageFile)
 {
+    m_pTile = new TileableSprite(szImageFile);
 }
 
 ParallaxLayer::~ParallaxLayer()
 {
+    delete m_pTile;
 }
 
 void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth, ULONG ulViewHeight)
@@ -28,9 +29,9 @@ void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth,
         cy++;
     }
 
-    TileableSprite::Initialize(ulAxis & AXIS_HORIZONTAL ? cx : 1, ulAxis & AXIS_VERTICAL ? cy : 1);
+    m_pTile->Initialize(ulAxis & AXIS_HORIZONTAL ? cx : 1, ulAxis & AXIS_VERTICAL ? cy : 1);
 
-    Vec2 vInsertPos = TileableSprite::myPosition;
+    Vec2 &vInsertPos = m_pTile->myPosition;
 
     if( ulAxis & AXIS_HORIZONTAL )
     {
@@ -42,8 +43,6 @@ void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth,
         vInsertPos.y = -3*h/2;
     }
 
-    TileableSprite::myPosition = vInsertPos;
-
     m_iLayerSpeed = iLayerSpeed;
     m_nViewWidth = ulViewWidth;
     m_nViewHeight = ulViewHeight;
@@ -51,7 +50,7 @@ void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth,
 
 void ParallaxLayer::Update(float dt)
 {
-    Sprite::Update(dt);
+    CGameObject::Update(dt);
 
     int w = GetWidth();
     int h = GetHeight();
@@ -67,6 +66,9 @@ void ParallaxLayer::Update(float dt)
 
     if(myPosition.y - h/2 >= 0)
         myPosition.y -= h;
+
+    // update tile position
+    m_pTile->myPosition = myPosition;
 }
 
 void ParallaxLayer::Move(ULONG ulDirection)

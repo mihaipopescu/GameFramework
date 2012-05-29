@@ -21,7 +21,6 @@ public:
     void Initialize(int cxTiles, int cyTiles);
 
     virtual void Draw() const;
-    virtual bool AffectedByGravity() const { return false; }
 
 private:
     int myXTileCount;
