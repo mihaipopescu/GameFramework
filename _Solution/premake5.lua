@@ -8,8 +8,8 @@ solution "GameFramework"
 		language "C++"
 		
 		
-		objdir "Compiled"
-		debugdir "."
+		objdir "../Compiled"
+		debugdir ".."
 		
 		files {
 			"../Includes/*.h",
