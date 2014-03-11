@@ -23,9 +23,10 @@ void AnimatedSprite::Initialize(const RECT& rcFirstFrame, int iFrameCount, float
 
 inline void AnimatedSprite::SetFrameIndex(int iFrameIndex)
 {
-    myFrameIndex = iFrameIndex; 
-    myFrameCrop.x = myFrameStartCrop.x + (myFrameIndex % (Sprite::GetWidth() / myFrameWidth)) * myFrameWidth;
-    myFrameCrop.y = myFrameStartCrop.y + (myFrameIndex / (Sprite::GetHeight() / myFrameHeight)) * myFrameHeight;
+	int stride = Sprite::GetWidth() / myFrameWidth;
+    myFrameIndex = iFrameIndex;
+    myFrameCrop.x = myFrameStartCrop.x + (myFrameIndex % stride) * myFrameWidth;
+	myFrameCrop.y = myFrameStartCrop.y + (myFrameIndex / stride) * myFrameHeight;
 }
 
 void AnimatedSprite::Update( float dt )
