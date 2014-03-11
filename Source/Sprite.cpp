@@ -187,11 +187,11 @@ void Sprite::drawTransparent(int dx, int dy) const
 
 	// Build mask based on transparent color
 	SetBkColor(mySpriteDC, myTransparentColor);
-	BitBlt(mySpriteMaskDC, 0, 0, w, h, mySpriteDC, 0, 0, SRCCOPY);
+	BitBlt(mySpriteMaskDC, 0, 0, w, h, mySpriteDC, cx, cy, SRCCOPY);
 
 	// Do the work - True Mask method - cool if not actual display
 	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCINVERT);
-	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteMaskDC, cx, cy, SRCAND);
+	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteMaskDC, 0, 0, SRCAND);
 	BitBlt(myBackBufferDC, x+dx, y+dy, w, h, mySpriteDC, cx, cy, SRCINVERT);
 
 	// Restore settings
