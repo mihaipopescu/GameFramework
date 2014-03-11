@@ -13,3 +13,9 @@ ipch
 *.idb
 *.ipch
 *.opensdf
+
+*.sln
+*.vcproj
+*.vcxproj
+*.user
+*.filters
