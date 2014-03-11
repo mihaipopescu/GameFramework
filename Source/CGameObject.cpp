@@ -1,6 +1,8 @@
 #include "CGameObject.h"
 #include "CGameApp.h"
 
+#define G_MULTIPLIER 20
+
 CGameObject::CGameObject() 
     : myCollisionSide(CS_None)
 {
@@ -19,7 +21,7 @@ void CGameObject::Update(float dt)
 	Vec2 a;
 
 	if( AffectedByGravity() && ((myCollisionSide & CS_Bottom) == 0) )
-		a.y = GRAVITATIONAL_CONSTANT;
+		a.y = GRAVITATIONAL_CONSTANT * G_MULTIPLIER;
 
 	// compute resultant acceleration
 	a += myAcceleration;

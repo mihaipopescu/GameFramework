@@ -82,7 +82,7 @@ bool CGameApp::CreateDisplay()
 	LPTSTR      WindowTitle = _T("GameFramework");
 	LPCSTR      WindowClass = _T("GameFramework_Class");
 	USHORT      Width       = 800;
-	USHORT      Height      = 600;
+	USHORT      Height      = 512;
 	RECT        rc;
 	WNDCLASSEX  wcex;
 
@@ -255,9 +255,6 @@ LRESULT CGameApp::DisplayWndProc( HWND hWnd, UINT Message, WPARAM wParam, LPARAM
 			case VK_ESCAPE:
 				PostQuitMessage(0);
 				break;
-			case VK_RETURN:
-				m_pPlayer.lock()->Explode();
-				break;
 			}
 			break;
 
@@ -284,13 +281,7 @@ bool CGameApp::BuildObjects()
 	m_vGameObjects.push_back(pPlayer);
 	m_pPlayer = pPlayer;
 
-	if(!m_imgBackground.LoadBitmapFromFile("data/background.bmp", GetDC(m_hWnd)))
-		return false;
-
-	m_imgBackground.SetFilter(new CBoxFilter());
-	m_imgBackground.Resample(m_nViewWidth, m_nViewHeight);
-
-    m_pParallax = new ParallaxLayer("data/tile.bmp");
+    m_pParallax = new ParallaxLayer("data/bg_day.bmp");
 
 	// Success!
 	return true;
@@ -302,8 +293,10 @@ bool CGameApp::BuildObjects()
 //-----------------------------------------------------------------------------
 void CGameApp::SetupGameState()
 {
+	srand(timeGetTime());
+
 	m_pPlayer.lock()->Init(Vec2(PLAYER_START_X, PLAYER_START_Y));
-    
+
     m_pParallax->myPosition = Vec2(m_pParallax->GetWidth()/2, m_pParallax->GetHeight()/2);
     m_pParallax->Initialize(ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
 }
@@ -345,6 +338,9 @@ void CGameApp::FrameAdvance()
 		SetWindowText( m_hWnd, TitleBuffer );
 	} // End if Frame Rate Altered
 
+	// Game logic
+	DoGameLogic();
+
 	// Poll & Process input devices
 	ProcessInput();
 
@@ -372,16 +368,6 @@ void CGameApp::ProcessInput( )
 	// Retrieve keyboard state
 	if ( !GetKeyboardState( pKeyBuffer ) ) return;
 
-	// Check the relevant keys
-	if ( pKeyBuffer[ VK_UP	] & 0xF0 ) Direction |= CPlayer::DIR_FORWARD;
-	if ( pKeyBuffer[ VK_DOWN  ] & 0xF0 ) Direction |= CPlayer::DIR_BACKWARD;
-	if ( pKeyBuffer[ VK_LEFT  ] & 0xF0 ) Direction |= CPlayer::DIR_LEFT;
-	if ( pKeyBuffer[ VK_RIGHT ] & 0xF0 ) Direction |= CPlayer::DIR_RIGHT;
-
-	
-	// Move the player
-	m_pPlayer.lock()->Move(Direction);
-
 	// Now process the mouse (if the button is pressed)
 	if ( GetCapture() == m_hWnd )
 	{
@@ -390,6 +376,9 @@ void CGameApp::ProcessInput( )
 
 		// Retrieve the cursor position
 		GetCursorPos( &CursorPos );
+
+		// Move the player
+		m_pPlayer.lock()->Flap();
 
 		// Reset our cursor position so we can keep going forever :)
 		SetCursorPos( m_OldCursorPos.x, m_OldCursorPos.y );
@@ -411,7 +400,7 @@ void CGameApp::AnimateObjects()
 	UpdateFunctor updateFn(dt);
 	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), updateFn);
 
-    m_pParallax->Move(CPlayer::DIR_FORWARD);
+    m_pParallax->Move( ParallaxLayer::DIR_RIGHT );
     m_pParallax->Update(dt);
 }
 
@@ -425,7 +414,6 @@ void CGameApp::DrawObjects()
 
 	HDC hdc = m_pBBuffer->getDC();
 
-    m_imgBackground.Paint(hdc, 0, 0);
     m_pParallax->Draw();
 
 	DrawFunctor drawFn;
@@ -472,4 +460,10 @@ void CGameApp::CollisionDetection()
 			pGameObj->myCollisionSide |= CS_Bottom;
 		}
 	}
+}
+
+
+void CGameApp::DoGameLogic()
+{
+	// generate tubes
 }

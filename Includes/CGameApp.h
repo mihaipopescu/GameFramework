@@ -58,15 +58,16 @@ private:
 	// Private Functions for This Class
 	//-------------------------------------------------------------------------
 	bool        BuildObjects	( );
-	void        ReleaseObjects( );
+	void        ReleaseObjects	( );
 	void        FrameAdvance	( );
 	bool        CreateDisplay	( );
 	void        ChangeDevice	( );
-	void        SetupGameState( );
-	void        AnimateObjects( );
+	void        SetupGameState	( );
+	void        AnimateObjects	( );
 	void        DrawObjects		( );
 	void        ProcessInput	( );
 	void        CollisionDetection();
+	void		DoGameLogic		();
 	
 	//-------------------------------------------------------------------------
 	// Private Static Functions For This Class
@@ -93,7 +94,6 @@ private:
 	POINT               m_OldCursorPos;     // Old cursor position for tracking
 	HINSTANCE		    m_hInstance;		// Window instance
 
-	CResizableImage     m_imgBackground;
 	BackBuffer*         m_pBBuffer;
     ParallaxLayer*      m_pParallax;
 
