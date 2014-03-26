@@ -13,7 +13,6 @@
 // Main Application Includes
 //-----------------------------------------------------------------------------
 #define CRTDBG_MAP_ALLOC
-#include "..\\Res\\resource.h"
 #include <windows.h>
 #include <crtdbg.h>
 #include <assert.h> 
@@ -32,7 +31,7 @@
 #define MEDIUM_VISCOSITY 0.5f
 
 #define EPS 1e-3 // epsilon (the smallest float value used)
-#define PI 3.14159265358979323846
+#define PI 3.14159265358979323846f
 #define DEG2RAD(deg) (PI * (deg) / 180.0)
 #define RAD2DEG(rad) ((rad) * 180.0 / PI)
 

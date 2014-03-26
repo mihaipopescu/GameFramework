@@ -14,6 +14,7 @@ solution "GameFramework"
 		files {
 			"../Includes/*.h",
 			"../Source/*.cpp",
+			"../Source/*.inl",
 			"../Docs/*.txt",
 		}
 		
@@ -34,11 +35,6 @@ solution "GameFramework"
 		configuration { "windows", "vs*" }
 			defines { "WIN32" }
 			flags { "NoIncrementalLink", "NoEditAndContinue", "NoPCH" }
-			
-			files {
-				"../Res/*.rc",
-				"../Res/*.h",
-			}
 
 			configuration "Debug"
 				defines { "_DEBUG" }
