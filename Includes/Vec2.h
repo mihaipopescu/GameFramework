@@ -1,48 +1,57 @@
 /*! 
  *  \brief     Vec2 class.
- *  \details   Defines vector based coordinates used throughout game.
- *						 Overrides operators to allow two entry vector based calculations.
+ *  \details   Helper class that handles 2D spatial vectors.
  *  \author    Mihai Popescu
- *  \date      01/03/2009
+ *  \date      03/15/2013
  *  \copyright GNU Public License.
  */
 
 #ifndef VEC2_H
 #define VEC2_H
 
-class Vec2
+#pragma once
+
+struct Vec2
 {
+	Vec2();
+	Vec2(float x, float y);
+
+	Vec2& operator+=(const Vec2 &vector);
+	Vec2& operator-=(const Vec2 &vector);
+	Vec2& operator*=(float factor);
+	Vec2& operator*=(const Vec2 &vector);
+	Vec2& operator/=(float divisor);
+
+	friend Vec2 operator-(const Vec2& v);
+
+	friend bool operator==(const Vec2& v1, const Vec2& v2);
+	friend bool operator!=(const Vec2& v1, const Vec2& v2);
+
+	friend Vec2 operator+(const Vec2& v1, const Vec2& v2);
+	friend Vec2 operator-(const Vec2& v1, const Vec2& v2);
+	friend Vec2 operator*(const Vec2& v1, const Vec2& v2);
+	friend Vec2 operator*(float factor, const Vec2& v);
+	friend Vec2 operator*(const Vec2& v, float factor);
+	friend Vec2 operator/(const Vec2& v, float divisor);
+
+	friend float Dot(const Vec2& v1, const Vec2& v2);
+	friend float Distance(const Vec2& v1, const Vec2& v2);
+	friend float SquaredDistance(const Vec2& v1, const Vec2& v2);
+
+	friend Vec2 Polar(float radius, float angle);
+
+	Vec2& Rotate(float angle);
+	float Length() const;
+	float SquaredLength() const;
+	float Normalize();
+	float Argument() const;
+
 public:
-		double x, y;
-
-		Vec2() : x(0), y(0){ }
-		Vec2(double a, double b) { x=a; y=b; }
-		Vec2(int a, int b) { x=a; y=b; }
-		~Vec2(){ };
-
-		Vec2& operator-();
-
-		bool operator==(Vec2 v);
-		bool operator!=(Vec2 v);
-
-		Vec2  operator+(Vec2 v);	// +translate
-		Vec2  operator-(Vec2 v);	// -translate
-		Vec2& operator+=(Vec2 v);	// inc translate
-		Vec2& operator-=(Vec2 v);	// dec translate
-
-		double operator*(Vec2 v);		// dot product
-		Vec2 operator*(double s);		// scale
-		Vec2 operator/(double s);		// scale
-		void Rotate(double radians);
-
-		Vec2 Normalize(){ return *this * (1/Magnitude()); }
-		double Magnitude() const;			// Polar magnitude
-		double Argument() const;			// Polar argument
-		double Distance(Vec2 v) const;		// Distance
+	float x, y;
 };
 
-Vec2 Polar(double r, double radians);
-double PrincipleAngle(double radians);
-
+#ifndef _DEBUG
+#include "Vec2.inl"
+#endif
 
 #endif // VEC2_H
