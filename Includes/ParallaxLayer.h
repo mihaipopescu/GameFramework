@@ -43,6 +43,7 @@ public:
     virtual bool    AffectedByGravity() const { return false; }
     virtual int     GetWidth() const { return m_pTile->GetWidth(); }
     virtual int     GetHeight() const { return m_pTile->GetHeight(); }
+	int				GetLayerSpeed() const { return m_iLayerSpeed; }
 
 private:
 	/*-------------------------------------------------------------------------

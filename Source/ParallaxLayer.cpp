@@ -35,12 +35,12 @@ void ParallaxLayer::Initialize(ULONG ulAxis, int iLayerSpeed, ULONG ulViewWidth,
 
     if( ulAxis & AXIS_HORIZONTAL )
     {
-        vInsertPos.x = -3*w/2;
+        vInsertPos.x = -3*w/2.0f;
     }
 
     if( ulAxis & AXIS_VERTICAL )
     {
-        vInsertPos.y = -3*h/2;
+        vInsertPos.y = -3*h/2.0f;
     }
 
     m_iLayerSpeed = iLayerSpeed;
@@ -77,21 +77,21 @@ void ParallaxLayer::Move(ULONG ulDirection)
 
     if( ulDirection & ParallaxLayer::DIR_RIGHT )
     {
-        myVelocity.x = -m_iLayerSpeed;
+		myVelocity.x = -(float)m_iLayerSpeed;
     }
 
     if( ulDirection & ParallaxLayer::DIR_LEFT )
     {
-        myVelocity.x = m_iLayerSpeed;
+        myVelocity.x = (float)m_iLayerSpeed;
     }
 
     if( ulDirection & ParallaxLayer::DIR_FORWARD )
     {
-        myVelocity.y = m_iLayerSpeed;
+		myVelocity.y = (float)m_iLayerSpeed;
     }
 
     if( ulDirection & ParallaxLayer::DIR_BACKWARD )
     {
-        myVelocity.y = -m_iLayerSpeed;
+		myVelocity.y = -(float)m_iLayerSpeed;
     }
 }

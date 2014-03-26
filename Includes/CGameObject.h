@@ -16,8 +16,7 @@ enum GameObjectType
 {
 	GOT_Invalid = -1,
 	GOT_Player,
-	GOT_Bullet,
-	GOT_Crate,
+	GOT_Tube,
 };
 
 enum CollisionSide
@@ -27,6 +26,14 @@ enum CollisionSide
     CS_Right = 2,
     CS_Top = 4,
     CS_Bottom = 8
+};
+
+enum CollisionFlag
+{
+	CF_None = 0,
+	CF_Screen = 1,
+	CF_Player = 2,
+	CF_Tube = 4,
 };
 
 class IDrawable
@@ -47,11 +54,12 @@ public:
     virtual ~CGameObject();
 
 	virtual GameObjectType GetObjectType() const { return GOT_Invalid; }
+	virtual CollisionFlag GetCollisionResponseFlag() const { return CF_None; }
 
     virtual void Draw() const;
 	virtual void Update(float dt);
 	virtual bool Expired() const { return false; }
-	virtual bool AffectedByGravity() const { return true; }
+	virtual void ResolveCollision();
 
 public:
 	// Keep these public because they need to be
@@ -59,10 +67,16 @@ public:
 	Vec2 myVelocity;
 	Vec2 myAcceleration;
     int myCollisionSide;
+	int myCollisionMask;
+	bool myBodyIsStatic;
 
 private:
+
+#ifdef _DEBUG
     HPEN mySpeedPen;
     HPEN myAccelerationPen;
+#endif
+
     Vec2 myResultant;
 };
 

@@ -40,9 +40,12 @@ public:
 	void            Init(const Vec2& position);
 	void            Update( float dt );
 	GameObjectType  GetObjectType() const { return GOT_Player; }
+	CollisionFlag	GetCollisionResponseFlag() const { return CF_Player; }
+	void			ResolveCollision();
 	void            Draw() const;
 
 	void			Flap();
+	bool			IsAlive() const { return m_bIsAlive; }
 	
 	virtual int	    GetWidth() const { return m_pSprite->GetWidth(); }
 	virtual int     GetHeight() const { return m_pSprite->GetHeight(); }
@@ -52,6 +55,7 @@ private:
 	// Private Variables for This Class.
 	//-------------------------------------------------------------------------
 	AnimatedSprite*	m_pSprite;
+	bool			m_bIsAlive;
 };
 
 #endif // _CPLAYER_H_

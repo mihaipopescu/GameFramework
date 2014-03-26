@@ -9,16 +9,19 @@
 //-----------------------------------------------------------------------------
 // CGameApp Specific Includes
 //-----------------------------------------------------------------------------
+#include <algorithm>
+
 #include "CGameApp.h"
 #include "CPlayer.h"
-#include <algorithm>
+#include "CTube.h"
+
 
 SINGLETON_IMPL(CGameApp);
 
 extern HINSTANCE g_hInst;
 
 #define PLAYER_START_X 100
-#define PLAYER_START_Y 400
+#define PLAYER_START_Y 300
 #define PARALLAX_BACKGROUND_SPEED 64
 
 //-----------------------------------------------------------------------------
@@ -93,12 +96,12 @@ bool CGameApp::CreateDisplay()
 	wcex.cbClsExtra     = 0;
 	wcex.cbWndExtra     = 0;
 	wcex.hInstance      = g_hInst;
-	wcex.hIcon          = LoadIcon(g_hInst, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hIcon			= NULL;
 	wcex.hCursor        = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName   = 0;
 	wcex.lpszClassName  = WindowClass;
-	wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hIconSm		= NULL;
 
 	if(RegisterClassEx(&wcex)==0)
 		return false;
@@ -277,11 +280,19 @@ bool CGameApp::BuildObjects()
 {
 	m_pBBuffer = new BackBuffer(m_hWnd, m_nViewWidth, m_nViewHeight);
 
+	m_pParallax = new ParallaxLayer("data/bg_day.bmp");
+	m_pParallax->myPosition = Vec2(m_pParallax->GetWidth() / 2.f, m_pParallax->GetHeight() / 2.f);
+	m_pParallax->Initialize(ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
+	m_pParallax->Move(ParallaxLayer::DIR_RIGHT);
+
 	auto pPlayer = std::make_shared<CPlayer>();
 	m_vGameObjects.push_back(pPlayer);
 	m_pPlayer = pPlayer;
 
-    m_pParallax = new ParallaxLayer("data/bg_day.bmp");
+	m_vGameObjects.push_back(std::make_shared<CTube>(CTube::ETube_Up, Vec2(300, 200), 100));
+	m_vGameObjects.push_back(std::make_shared<CTube>(CTube::ETube_Down, Vec2(300, 200), 100));
+
+    
 
 	// Success!
 	return true;
@@ -297,8 +308,6 @@ void CGameApp::SetupGameState()
 
 	m_pPlayer.lock()->Init(Vec2(PLAYER_START_X, PLAYER_START_Y));
 
-    m_pParallax->myPosition = Vec2(m_pParallax->GetWidth()/2, m_pParallax->GetHeight()/2);
-    m_pParallax->Initialize(ParallaxLayer::AXIS_VERTICAL | ParallaxLayer::AXIS_HORIZONTAL, PARALLAX_BACKGROUND_SPEED, m_nViewWidth, m_nViewHeight);
 }
 
 //-----------------------------------------------------------------------------
@@ -368,6 +377,11 @@ void CGameApp::ProcessInput( )
 	// Retrieve keyboard state
 	if ( !GetKeyboardState( pKeyBuffer ) ) return;
 
+	if (pKeyBuffer[VK_SPACE] & 0xF0)
+	{
+		m_pPlayer.lock()->Flap();
+	}
+
 	// Now process the mouse (if the button is pressed)
 	if ( GetCapture() == m_hWnd )
 	{
@@ -392,16 +406,18 @@ void CGameApp::ProcessInput( )
 //-----------------------------------------------------------------------------
 void CGameApp::AnimateObjects()
 {
-	ExpiredPredicate expiredPred;
-	m_vGameObjects.erase(std::remove_if(m_vGameObjects.begin(), m_vGameObjects.end(), expiredPred), m_vGameObjects.end());
+	if (m_pPlayer.lock()->IsAlive())
+	{
+		ExpiredPredicate expiredPred;
+		m_vGameObjects.erase(std::remove_if(m_vGameObjects.begin(), m_vGameObjects.end(), expiredPred), m_vGameObjects.end());
 
-    float dt = m_Timer.GetTimeElapsed();
+		float dt = m_Timer.GetTimeElapsed();
 
-	UpdateFunctor updateFn(dt);
-	std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), updateFn);
+		UpdateFunctor updateFn(dt);
+		std::for_each(m_vGameObjects.begin(), m_vGameObjects.end(), updateFn);
 
-    m_pParallax->Move( ParallaxLayer::DIR_RIGHT );
-    m_pParallax->Update(dt);
+		m_pParallax->Update(dt);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -436,6 +452,12 @@ void CGameApp::CollisionDetection()
 
         pGameObj->myCollisionSide = CS_None;
 
+		if ((pGameObj->myCollisionMask & CF_Screen) == 0)
+			continue;
+
+		if (pGameObj->myBodyIsStatic)
+			continue;
+
         int dx = (int)pos.x - pGameObj->GetWidth() / 2;
 		if( dx < 0 )
 		{
@@ -458,6 +480,50 @@ void CGameApp::CollisionDetection()
 		if( dy > 0 )
 		{
 			pGameObj->myCollisionSide |= CS_Bottom;
+		}
+	}
+
+	// collision
+	for (auto it = m_vGameObjects.begin(); it != m_vGameObjects.end(); ++it)
+	{
+		CGameObject * pGameObj1 = it->get();
+		for (auto it2 = m_vGameObjects.begin(); it2 != m_vGameObjects.end(); ++it2)
+		{
+			CGameObject * pGameObj2 = it2->get();
+			
+			if (pGameObj1 == pGameObj2)
+				continue;
+
+			// check collision flags
+			if (pGameObj1->myCollisionMask & pGameObj2->GetCollisionResponseFlag())
+			{
+				Vec2 radius = pGameObj2->myPosition - pGameObj1->myPosition;
+				Vec2 limit(pGameObj1->GetWidth() * 0.5f + pGameObj2->GetWidth() * 0.5f, pGameObj1->GetHeight() * 0.5f + pGameObj2->GetHeight() * 0.5f);
+
+				if (fabs(radius.x) < limit.x && fabs(radius.y) < limit.y)
+				{
+					if (radius.x > 0 && pGameObj1->myPosition.x < pGameObj2->myPosition.x - pGameObj2->GetWidth() / 2)
+					{
+						pGameObj1->myCollisionSide |= CS_Right;
+						pGameObj2->myCollisionSide |= CS_Left;
+					}
+					if (radius.x < 0 && pGameObj1->myPosition.x > pGameObj2->myPosition.x + pGameObj2->GetWidth() / 2)
+					{
+						pGameObj1->myCollisionSide |= CS_Left;
+						pGameObj2->myCollisionSide |= CS_Right;
+					}
+					if (radius.y > 0 && pGameObj1->myPosition.y < pGameObj2->myPosition.y - pGameObj2->GetHeight() / 2)
+					{
+						pGameObj1->myCollisionSide |= CS_Bottom;
+						pGameObj2->myCollisionSide |= CS_Top;
+					}
+					if (radius.y < 0 && pGameObj1->myPosition.y > pGameObj2->myPosition.y + pGameObj2->GetHeight() / 2)
+					{
+						pGameObj1->myCollisionSide |= CS_Top;
+						pGameObj2->myCollisionSide |= CS_Bottom;
+					}
+				}
+			}
 		}
 	}
 }

@@ -13,12 +13,17 @@ public:
 		ETube_Down,
 	};
 
-	CTube(ETubeType type, const Vec2& position);
+	CTube(ETubeType type, const Vec2& position, int gap);
+	~CTube();
 
-	void		Draw() const;
+	virtual void			Draw() const;
+	virtual void			Update(float dt);
 
-	virtual int	GetWidth() const { return m_pSprite->GetWidth(); }
-	virtual int GetHeight() const { return m_pSprite->GetHeight(); }
+	virtual int				GetWidth() const { return m_pSprite->GetWidth(); }
+	virtual int				GetHeight() const { return m_pSprite->GetHeight(); }
+	virtual bool			Expired() const;
+	virtual GameObjectType  GetObjectType() const { return GOT_Tube; }
+	virtual CollisionFlag	GetCollisionResponseFlag() const { return CF_Tube; }
 
 private:
 	Sprite*		m_pSprite;

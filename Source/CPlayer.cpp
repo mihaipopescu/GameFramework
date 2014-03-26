@@ -21,6 +21,9 @@
 CPlayer::CPlayer()
 {
 	m_pSprite = new AnimatedSprite("data/bird_green.bmp", RGB(0xff, 0x00, 0xff));
+
+	myCollisionMask = CF_Screen | CF_Tube;
+	m_bIsAlive = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -35,6 +38,7 @@ CPlayer::~CPlayer()
 void CPlayer::Init(const Vec2& position)
 {
     myPosition = position;
+	myBodyIsStatic = false;
 
     // Animation frame crop rectangle
     RECT r;
@@ -56,7 +60,7 @@ void CPlayer::Update(float dt)
 	m_pSprite->Update(dt);
 
 	// Get velocity
-	double v = myVelocity.Magnitude();
+	// float v = myVelocity.Length();
 
 	// NOTE: for each async sound played Windows creates a thread for you
 	// but only one, so you cannot play multiple sounds at once.
@@ -72,10 +76,19 @@ void CPlayer::Update(float dt)
 
 void CPlayer::Draw() const
 {
+	CGameObject::Draw();
 	m_pSprite->Draw();
 }
 
 void CPlayer::Flap()
 {
 	myVelocity.y = FLAP_SPEED_IMPULSE;
+}
+
+void CPlayer::ResolveCollision()
+{
+	if (myCollisionSide != 0)
+	{
+		m_bIsAlive = false;
+	}
 }

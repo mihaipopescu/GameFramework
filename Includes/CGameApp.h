@@ -52,6 +52,11 @@ public:
 	int         BeginGame( );
 	bool        ShutDown( );
     HDC         GetBackBufferDC() const { return m_pBBuffer ? m_pBBuffer->getDC() : NULL; }
+
+	ULONG       GetViewWidth() const { return m_nViewWidth; }
+	ULONG       GetViewHeight() const { return m_nViewHeight; }
+
+	CGameObject* GetParalaxLayer() { return m_pParallax; }
 	
 private:
 	//-------------------------------------------------------------------------
